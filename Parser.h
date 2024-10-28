@@ -16,8 +16,10 @@ public:
 	Parser(std::string pathToFile);
 
 	std::string getText();
-	int countOf(std::string expression);
+	int countOf(std::string expression); // Count of expression in text
 	int countOf(char expression);
 	bool isEmptyFile();
 	std::vector <Token> execTokenization();
+	std::vector <int> getPosListOf(char expr);
+	std::vector <int> getPosListOf(std::string expr);
 };

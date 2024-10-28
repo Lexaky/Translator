@@ -15,6 +15,7 @@ Parser::Parser(std::string pathToFile) {
 			this->text += line;
 		}
 		removeSpaces();
+		reader.close();
 	}
 	else {
 		std::cout << "Неверный путь к файлу\n";
@@ -31,7 +32,7 @@ int Parser::countOf(std::string expression) {
 	for (int i = 0; i < text.length() - expression.length() + 1; i++) {
 		flagOfContain = true;
 		for (int j = 0; j < expression.length(); j++) {
-			if (text.at(i) != expression.at(j)) {
+			if (text.at(i+j) != expression.at(j)) {
 				flagOfContain = false;
 				break;
 			}
@@ -39,6 +40,36 @@ int Parser::countOf(std::string expression) {
 		flagOfContain == true ? sum++ : sum = sum;
 	}
 	return sum;
+}
+
+std::vector <int> Parser::getPosListOf(char expr) {
+	std::vector <int> poses;
+	poses.reserve(text.length());
+	for (int i = 0; i < text.length(); i++) {
+		if (text.at(i) == expr) {
+			poses.push_back(i);
+		}
+	}
+	return poses;
+}
+
+std::vector <int> Parser::getPosListOf(std::string expr) {
+	std::vector <int> poses;
+	bool flagOfContain;
+	poses.reserve(text.length());
+	for (int i = 0; i < text.length() - expr.length(); i++) {
+		flagOfContain = true;
+		for (int j = 0; j < expr.length(); j++) {
+			if (text.at(i + j) != expr.at(j)) {
+				flagOfContain = false;
+				break;
+			}
+		}
+		if (flagOfContain) {
+			poses.push_back(i);
+		}
+	}
+	return poses;
 }
 
 int Parser::countOf(char expression) {
