@@ -12,6 +12,7 @@ public:
 	Token(std::string text);
 	
 	void getContext();
+	std::string getToken();
 	// Далее методы-определители типа токена (что за слово или выражение)
 
 };

@@ -85,10 +85,3 @@ bool Parser::isEmptyFile() {
 	removeSpaces();
 	return text.length() == 0;
 }
-
-std::vector<Token> Parser::execTokenization() {
-	//Здесь должна быть логика разделения текста из файла на выражения
-	std::vector <Token> words;
-	words.reserve(text.length()); // as max
-	
-}

@@ -8,3 +8,7 @@ Token::Token(std::string text) {
 		std::cout << "Пустой токен\n";
 	}
 }
+
+std::string Token::getToken() {
+	return token;
+}
