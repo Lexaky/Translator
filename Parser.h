@@ -17,8 +17,8 @@ public:
 
 	std::string getText();
 	int countOf(std::string expression); // Count of expression in text
-	int countOf(char expression);
+	int countOf(char expression); //same
 	bool isEmptyFile();
-	std::vector <int> getPosListOf(char expr);
-	std::vector <int> getPosListOf(std::string expr);
+	std::vector <int> getPosListOf(char expr); // Vector of positions of expression in text
+	std::vector <int> getPosListOf(std::string expr); //same
 };

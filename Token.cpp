@@ -5,7 +5,7 @@ Token::Token(std::string text) {
 		this->token = text;
 	else {
 		token = "";
-		std::cout << "Пустой токен\n";
+		std::cout << "Empty token\n";
 	}
 }
 

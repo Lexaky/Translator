@@ -18,7 +18,7 @@ Parser::Parser(std::string pathToFile) {
 		reader.close();
 	}
 	else {
-		std::cout << "Неверный путь к файлу\n";
+		std::cout << "Wrong path to file\n";
 	}
 }
 

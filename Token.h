@@ -5,14 +5,15 @@
 class Token {
 private:
 	std::string token;
-	// Если при определении типа токена нужно знать контекст ([token-1] + [token] + [token+1])
-	std::string context = "";
+	// context is ([backContext], [token], [nextContext]), where back and next contexts is also tokens
+	std::string backContext = "";
+	std::string nextContext = "";
 
 public:
 	Token(std::string text);
 	
-	void getContext();
-	std::string getToken();
-	// Далее методы-определители типа токена (что за слово или выражение)
+	void getContext(); // Must return context in backContext and nextContext
+	std::string getToken(); // return token
+	
 
 };
