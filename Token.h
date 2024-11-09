@@ -12,8 +12,6 @@ private:
 public:
 	Token(std::string text);
 	
-	void getContext(); // Must return context in backContext and nextContext
+	void getContext(); // Must return context in backContext and nextContext if it's possible
 	std::string getToken(); // return token
-	
-
 };

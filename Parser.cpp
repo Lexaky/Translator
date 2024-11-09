@@ -16,6 +16,9 @@ Parser::Parser(std::string pathToFile) {
 		}
 		removeSpaces();
 		reader.close();
+		if (isEmptyFile()) {
+			std::cout << "File wasn't contain smth\n";
+		}
 	}
 	else {
 		std::cout << "Wrong path to file\n";
@@ -82,6 +85,5 @@ int Parser::countOf(char expression) {
 }
 
 bool Parser::isEmptyFile() {
-	removeSpaces();
 	return text.length() == 0;
 }

@@ -130,6 +130,7 @@
     <ClCompile Include="DataTypesToken.cpp" />
     <ClCompile Include="Op.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="Rules.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="Translator.cpp" />
   </ItemGroup>
@@ -137,6 +138,7 @@
     <ClInclude Include="DataTypesToken.h" />
     <ClInclude Include="Op.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="Rules.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
