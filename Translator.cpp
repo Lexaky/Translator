@@ -1,9 +1,9 @@
-﻿#include <iostream>
+#include "Translator.h"
 
-using namespace std;
+std::string Translator::translate(std::string sourceCode)
+{
+	Lexer lexer;
+	
 
-int main() {
-	setlocale(LC_ALL, "rus");
-
-	return 0;
+	return NULL;
 }

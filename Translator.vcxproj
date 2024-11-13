@@ -127,19 +127,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DataTypesToken.cpp" />
+    <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="TokenTypes.cpp" />
     <ClCompile Include="Op.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Rules.cpp" />
     <ClCompile Include="Token.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="TokenTypesEnum.h" />
     <ClCompile Include="Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DataTypesToken.h" />
+    <ClInclude Include="Lexer.h" />
     <ClInclude Include="Op.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Rules.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="TokenTypes.h" />
+    <ClInclude Include="Translator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
