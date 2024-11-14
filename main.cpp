@@ -28,9 +28,13 @@ int main() {
 	//else {
 	//	std::cout << "Wrong path to file\n";
 	//}
-	//Translator translator;
-	//std::string result = translator.translate(text);
-	//std::cout << result;
+	Lexer lexer;
+	Parser parser("javacode.txt");
+	std::vector<Token> variable = lexer.extractTokens(parser.getText());
+	for (int i = 0; i < variable.size(); i++) {
+		std::cout << "Type: " << variable.at(i).getTokenType() << std::endl;
+		std::cout << "Value: " << variable.at(i).getValue() << std::endl;
+	}
 
 	return 0;
 }

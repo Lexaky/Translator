@@ -1,0 +1,9 @@
+package ru.demo.example;
+import java.lang.Math;
+public class Main {
+private static String a = "Hi ";
+public static void main (String[] args) {
+String b = "Bob";
+System.out.println(a + b);
+}
+}
