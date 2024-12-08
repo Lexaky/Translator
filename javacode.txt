@@ -1,0 +1,9 @@
+package ru.demo.example;
+public class Main {
+private static String a = "Hello world!";
+public static void main (String[] args) {
+int v = 124;
+String b += "Bob";
+System.out.println(a+b);
+}
+}

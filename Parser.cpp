@@ -12,16 +12,17 @@ Parser::Parser(std::string pathToFile) {
 	std::ifstream reader(pathToFile);
 	if (reader.is_open()) {
 		while (std::getline(reader, line)) {
-			this->text += line;
+			this->text += line + "\n";
 		}
-		removeSpaces();
 		reader.close();
 		if (isEmptyFile()) {
 			std::cout << "File wasn't contain smth\n";
+			exit(1);
 		}
 	}
 	else {
 		std::cout << "Wrong path to file\n";
+		exit(1);
 	}
 }
 
