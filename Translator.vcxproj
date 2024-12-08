@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AllowedSymbols.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="TokenTypes.cpp" />
     <ClCompile Include="Op.cpp" />
@@ -138,6 +139,7 @@
     <ClCompile Include="Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AllowedSymbols.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Op.h" />
     <ClInclude Include="Parser.h" />
@@ -145,6 +147,9 @@
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Translator.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="javacode.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

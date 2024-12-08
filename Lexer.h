@@ -7,13 +7,16 @@
 #include "Token.h"
 #include "TokenTypesEnum.h"
 #include "TokenTypes.h"
+#include "AllowedSymbols.h"
+
+using namespace std;
 
 class Lexer {
 public:
-    std::vector<Token> extractTokens(std::string sourceCode);
+    vector<Token> extractTokens(string sourceCode);
 private:
-    std::vector<Token> tokens;
+    vector<Token> tokens;
     
-    std::string trim(const std::string& str);
-    Token getToken(std::string str);
+    string trim(const string& str);
+    Token getToken(string str);
 };

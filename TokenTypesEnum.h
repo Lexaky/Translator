@@ -6,5 +6,9 @@ enum TokenTypesEnum {
     KEY_WORD,
     SPECIAL_SYMBOL,
     OPERATOR,
+    STRING,
+    CHAR,
+    NUMBER,
+    IDENTIFIER,
     UNKNOWN
 };
