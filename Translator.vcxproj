@@ -128,6 +128,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AllowedSymbols.cpp" />
+    <ClCompile Include="AST.cpp" />
+    <ClCompile Include="ASTBuilder.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="TokenTypes.cpp" />
     <ClCompile Include="Op.cpp" />
@@ -140,6 +142,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AllowedSymbols.h" />
+    <ClInclude Include="AST.h" />
+    <ClInclude Include="ASTBuilder.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Op.h" />
     <ClInclude Include="Parser.h" />

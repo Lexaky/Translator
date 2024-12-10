@@ -6,6 +6,8 @@
 
 #include "Token.h"
 #include "Translator.h"
+#include "AST.h"
+#include "ASTBuilder.h"
 
 using namespace std;
 
@@ -35,6 +37,24 @@ int main() {
 		std::cout << "Type: " << variable.at(i).getTokenType() << std::endl;
 		std::cout << "Value: " << variable.at(i).getValue() << std::endl;
 	}
+
+
+	try {
+
+		// Создание ASTBuilder и построение дерева
+		ASTBuilder astBuilder(variable);
+		std::shared_ptr<AST> ast = astBuilder.buildAST();
+
+		// Вывод AST
+		std::cout << "Abstract Syntax Tree:" << std::endl;
+		ast->print(); // Метод print() в классе AST, который рекурсивно выводит дерево
+
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return 1;
+	}
+
 
 	return 0;
 }
