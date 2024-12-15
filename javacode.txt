@@ -1,9 +1,10 @@
-package ru.demo.example;
 public class Main {
-private static String a = "Hello world!";
-public static void main (String[] args) {
-int v = 124;
-String b += "Bob";
-System.out.println(a+b);
-}
+	private static String a = "Hello world!";
+	protected static char g;
+	static final int b = 4;
+	public static void main (String[] args) {
+		int v = 124;
+		String b += "Bob";
+		System.out.println(a+b);
+	}
 }

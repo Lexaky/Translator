@@ -1,7 +1,7 @@
 ﻿#include "Lexer.h"
 
 vector<Token> Lexer::extractTokens(string sourceCode) {
-	string trimedCode = trim(sourceCode);
+	string trimedCode = trim1(sourceCode);
 	string tmp;
 	string ch;
 	int line = 1;
@@ -99,14 +99,29 @@ vector<Token> Lexer::extractTokens(string sourceCode) {
 
 		tmp += ch;
 	}
+	string lastWord = trim2(tmp);
+	if (!lastWord.empty()) {
+		tokens.push_back(getToken(lastWord));
+	}
+	tokens.push_back(Token("", TokenTypesEnum::END_OF_FILE));
 	return tokens;
 }
 
-string Lexer::trim(const string& str) {
+string Lexer::trim1(const string& str) {
 	size_t first = str.find_first_not_of(" \t\n\r\f\v");
 	if (first == string::npos) {
 		cout << "The text consists of nothing but spaces and space characters\n";
 		exit(1);
+	}
+
+	size_t last = str.find_last_not_of(" \t\n\r\f\v");
+	return str.substr(first, (last - first + 1));
+}
+
+string Lexer::trim2(const string& str) {
+	size_t first = str.find_first_not_of(" \t\n\r\f\v");
+	if (first == string::npos) {
+		return str;
 	}
 
 	size_t last = str.find_last_not_of(" \t\n\r\f\v");

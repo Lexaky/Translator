@@ -10,5 +10,6 @@ enum TokenTypesEnum {
     CHAR,
     NUMBER,
     IDENTIFIER,
+    END_OF_FILE,
     UNKNOWN
 };

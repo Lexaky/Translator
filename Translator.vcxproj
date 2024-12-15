@@ -128,9 +128,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AllowedSymbols.cpp" />
-    <ClCompile Include="AST.cpp" />
-    <ClCompile Include="ASTBuilder.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="SyntaxAnalyzer.cpp" />
     <ClCompile Include="TokenTypes.cpp" />
     <ClCompile Include="Op.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -142,12 +142,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AllowedSymbols.h" />
-    <ClInclude Include="AST.h" />
-    <ClInclude Include="ASTBuilder.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Op.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="Rules.h" />
+    <ClInclude Include="SyntaxAnalyzer.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Translator.h" />
