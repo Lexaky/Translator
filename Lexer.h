@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 #include "Token.h"
 #include "TokenTypesEnum.h"
@@ -20,4 +21,7 @@ private:
     string trim1(const string& str);
     string trim2(const string& str);
     Token getToken(string str);
+    TokenTypesEnum tryParseToken(string token);
+    TokenTypesEnum tryParseNumber(const string& str);
+    bool canBeIdentifier(const string& str);
 };

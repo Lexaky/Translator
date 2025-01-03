@@ -144,5 +144,59 @@ Token Lexer::getToken(string str)
 	if (TokenTypes::OPERATORS.count(str)) {
 		return Token(str, TokenTypesEnum::OPERATOR);
 	}
-	return Token(str, TokenTypesEnum::UNKNOWN);
+	return Token(str, tryParseToken(str));
+}
+
+TokenTypesEnum Lexer::tryParseToken(string token) {
+	if (token == "true" || token == "false") {
+		return TokenTypesEnum::BOOLEAN;
+	}
+	if (canBeIdentifier(token)) {
+		return TokenTypesEnum::IDENTIFIER;
+	}
+
+	TokenTypesEnum type = tryParseNumber(token);
+	if (type == TokenTypesEnum::UNKNOWN) {
+		string message = "Value '" + token + "' doesn't represent any Java constructions!";
+		cout << message;
+		exit(1);
+	}
+	else return type;
+}
+
+TokenTypesEnum Lexer::tryParseNumber(const string& str) {
+	if (str.empty()) {
+		return TokenTypesEnum::UNKNOWN;
+	}
+
+	bool hasDot = false;
+	size_t i = 0;
+	for (; i < str.length() - 1; ++i) {
+		if (!std::isdigit(str[i])) {
+			if (str[i] == '.') {
+				if (hasDot) return TokenTypesEnum::UNKNOWN;
+				hasDot = true;
+			}
+			else return TokenTypesEnum::UNKNOWN;
+		}
+	}
+
+	if (!std::isdigit(str[i])) {
+		return TokenTypesEnum::UNKNOWN;
+	}
+
+	if (hasDot) return TokenTypesEnum::FLOAT;
+	else return TokenTypesEnum::INT;
+}
+
+bool Lexer::canBeIdentifier(const string& str) {
+	if (str.empty()) return false;
+
+	if (!std::isalpha(str[0])) return false;
+
+	for (size_t i = 1; i < str.length(); ++i) {
+		if (!std::isalnum(str[i])) return false;
+	}
+
+	return true;
 }

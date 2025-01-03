@@ -24,7 +24,8 @@ private:
 	void checkTokensAfterStaticKeyword(string accessIdentifier, vector<Node> &nodes);
 	Node parseMethod(string accessIdentifier, string returnType);
 	Node parseClassConst();
-	Node parseClassVariable(string dataType, string identifier);
+	Node parseClassVariable(string dataType, string identifier, string thirdTokenValue);
 	//IfElseStatementNode parseIfElseStatement();
 	//WhileStatementNode parseWhileStatement();
+	bool checkTypeValueCompatibility(string dataType, TokenTypesEnum value);
 };

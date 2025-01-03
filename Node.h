@@ -39,24 +39,43 @@ private:
 //	vector<Node> params;
 //};
 //
-//class VariableDeclarationNode : public Node {
-//public:
-//	VariableDeclarationNode();
-//private:
-//	string type;
-//	string name;
-//	bool hasInitialization;
-//	Node initializer;
-//};
-//
-//class ConstDeclarationNode : public Node {
-//public:
-//	ConstDeclarationNode();
-//private:
-//	string type;
-//	string name;
-//	Node initializer;
-//};
+
+//Refactor declaration - extract common upper
+class VariableDeclarationNode : public Node {
+public:
+	VariableDeclarationNode() {};
+	void setType(string type);
+	void setName(string name);
+	void setGlobal(bool isGlobal);
+	void setInitialization(bool hasInitialization);
+	void setValue(string value);
+	void setInitializer(Node node);
+	string getType();
+private:
+	string type;
+	string name;
+	bool isGlobal;
+	string value;
+	bool hasInitialization;
+	Node initializer;
+};
+
+class ConstDeclarationNode : public Node {
+public:
+	ConstDeclarationNode() {};
+	void setType(string type);
+	void setName(string name);
+	void setGlobal(bool isGlobal);
+	void setValue(string value);
+	void setInitializer(Node node);
+	string getType();
+private:
+	string type;
+	string name;
+	bool isGlobal;
+	string value;
+	Node initializer;
+};
 //
 //class AssignmentNode : public Node {
 //public:

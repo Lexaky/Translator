@@ -84,7 +84,7 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(string accesIdentifier, vecto
 	Token token = getNextToken();
 	if (token.getValue() == "void") {
 		nodes.push_back(parseMethod(accesIdentifier, "void"));
-		mainMethodExists = true;
+		mainMethodExists = true; //add method identifier check
 	}
 	else if (token.getValue() == "final") {
 		nodes.push_back(parseClassConst());
@@ -92,13 +92,18 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(string accesIdentifier, vecto
 	else if (token.getTokenType() == TokenTypesEnum::DATA_TYPE) {
 		string dataType = token.getValue();
 		token = getNextToken();
-		string probobalIdentifier = token.getValue();	//identifier validation
+		if (token.getTokenType() != TokenTypesEnum::IDENTIFIER) {
+			string message = "Expected identifier, but was - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+		string identifier = token.getValue();
 		token = getNextToken();
 		if (token.getValue() == "(") {
 			nodes.push_back(parseMethod(accesIdentifier, dataType));
 		}
 		else {
-			nodes.push_back(parseClassVariable(dataType, probobalIdentifier));
+			nodes.push_back(parseClassVariable(dataType, identifier, token.getValue()));
 		}
 	}
 	else {
@@ -115,11 +120,119 @@ Node SyntaxAnalyzer::parseMethod(string accesIdentifier, string returnType)
 
 Node SyntaxAnalyzer::parseClassConst()
 {
-	return Node();
+	ConstDeclarationNode node;
+	node.setGlobal(true);
+
+	//Data type
+	Token token = getNextToken();
+	if (token.getTokenType() != TokenTypesEnum::DATA_TYPE) {
+		string message = "Expected data type, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	node.setType(token.getValue());
+
+	//Identifier
+	token = getNextToken();
+	if (token.getTokenType() != TokenTypesEnum::IDENTIFIER) {
+		string message = "Expected identifier, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	node.setName(token.getValue());
+	
+	//Assignment symbol
+	token = getNextToken();
+	if (token.getValue() != "=") {
+		string message = "Expected assignment symbol, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+
+	//Value or expression
+	token = getNextToken();
+	Token secondToken = getNextToken();
+	//Value
+	if (secondToken.getValue() == ";") {
+		if (node.getType() == "String" && token.getTokenType() == TokenTypesEnum::STRING
+			|| node.getType() == "char" && token.getTokenType() == TokenTypesEnum::CHAR
+			|| node.getType() == "boolean" && token.getTokenType() == TokenTypesEnum::BOOLEAN) {
+			node.setValue(token.getValue());
+		}
+		else if ((node.getType() == "int" || node.getType() == "long" || node.getType() == "short" || node.getType() == "byte")
+			&& token.getTokenType() == TokenTypesEnum::INT) {
+			node.setValue(token.getValue());
+		}
+		else if ((node.getType() == "float" || node.getType() == "double") && token.getTokenType() == TokenTypesEnum::FLOAT) {
+			node.setValue(token.getValue());
+		}
+		else {
+			string message = "Data type '" + node.getType() + "' doesn't match value - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+	}
+	//Expression
+	else {
+		//Not implemented yet!!!!!!!!!!!!!!!!!!!!!!!!!!
+		string message = "Expression parsing is not implemented";
+		cout << message;
+		exit(1);
+	}
+
+	return node;
 }
 
-Node SyntaxAnalyzer::parseClassVariable(string dataType, string identifier)
+//Refactor Ctrl + C / Ctrl + V
+Node SyntaxAnalyzer::parseClassVariable(string dataType, string identifier, string thirdTokenValue)
 {
-	return Node();
+	VariableDeclarationNode node;
+	node.setGlobal(true);
+	node.setType(dataType);
+	node.setName(identifier);
+
+	//Assignment symbol or semicolon
+	if (thirdTokenValue == ";") {
+		node.setInitialization(false);
+		return node;
+	}
+	if (thirdTokenValue != "=") {
+		string message = "Expected assignment symbol, but was - " + thirdTokenValue;
+		cout << message;
+		exit(1);
+	}
+
+	//Value or expression
+	Token token = getNextToken();
+	Token secondToken = getNextToken();
+	//Value
+	if (secondToken.getValue() == ";") {
+		if (node.getType() == "String" && token.getTokenType() == TokenTypesEnum::STRING
+			|| node.getType() == "char" && token.getTokenType() == TokenTypesEnum::CHAR
+			|| node.getType() == "boolean" && token.getTokenType() == TokenTypesEnum::BOOLEAN) {
+			node.setValue(token.getValue());
+		}
+		else if ((node.getType() == "int" || node.getType() == "long" || node.getType() == "short" || node.getType() == "byte")
+			&& token.getTokenType() == TokenTypesEnum::INT) {
+			node.setValue(token.getValue());
+		}
+		else if ((node.getType() == "float" || node.getType() == "double") && token.getTokenType() == TokenTypesEnum::FLOAT) {
+			node.setValue(token.getValue());
+		}
+		else {
+			string message = "Data type '" + node.getType() + "' doesn't match value - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+	}
+	//Expression
+	else {
+		//Not implemented yet!!!!!!!!!!!!!!!!!!!!!!!!!!
+		string message = "Expression parsing is not implemented";
+		cout << message;
+		exit(1);
+	}
+
+	return node;
 }
 

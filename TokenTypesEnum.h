@@ -8,7 +8,9 @@ enum TokenTypesEnum {
     OPERATOR,
     STRING,
     CHAR,
-    NUMBER,
+    INT,
+    FLOAT,
+    BOOLEAN,
     IDENTIFIER,
     END_OF_FILE,
     UNKNOWN
