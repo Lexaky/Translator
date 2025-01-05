@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 #include <vector>
 
 using namespace std;
@@ -16,19 +17,21 @@ private:
 	vector<Node> body;
 };
 
-//class MethodDeclarationNode : public Node {
-//public:
-//	MethodDeclarationNode();
-//	void setReturnType(string type);
-//	void setName(string name);
-//	void setParams(vector<Node> params);
-//	void setBody(vector<Node>);
-//private:
-//	string returnType;
-//	string name;
-//	vector<Node> params;
-//	vector<Node> body;
-//};
+class MethodDeclarationNode : public Node {
+public:
+	MethodDeclarationNode() {};
+	void setMain(bool main);
+	void setReturnType(string type);
+	void setName(string name);
+	void setParams(map<string, string> params);
+	void setBody(vector<Node> body);
+private:
+	bool isMain;
+	string returnType;
+	string name;
+	map<string, string> params;
+	vector<Node> body;
+};
 //
 //class MethodCall : public Node {
 //public:

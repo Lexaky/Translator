@@ -13,6 +13,6 @@ private:
 public:
 	Token(std::string value, TokenTypesEnum tokenType);
 	Token():value("0"),tokenType(UNKNOWN) {}
-	std::string getValue();
-	TokenTypesEnum getTokenType();
+	std::string getValue() const;
+	TokenTypesEnum getTokenType() const;
 };

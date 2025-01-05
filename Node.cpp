@@ -59,3 +59,28 @@ string VariableDeclarationNode::getType()
 {
 	return type;
 }
+
+void MethodDeclarationNode::setMain(bool main)
+{
+	this->isMain = main;
+}
+
+void MethodDeclarationNode::setReturnType(string type)
+{
+	this->returnType = type;
+}
+
+void MethodDeclarationNode::setName(string name)
+{
+	this->name = name;
+}
+
+void MethodDeclarationNode::setParams(map<string, string> params)
+{
+	this->params = params;
+}
+
+void MethodDeclarationNode::setBody(vector<Node>)
+{
+	this->body = body;
+}

@@ -6,12 +6,12 @@ Token::Token(std::string value, TokenTypesEnum tokenType)
 	this->tokenType = tokenType;
 }
 
-std::string Token::getValue()
+std::string Token::getValue() const
 {
 	return value;
 }
 
-TokenTypesEnum Token::getTokenType()
+TokenTypesEnum Token::getTokenType() const
 {
 	return tokenType;
 }
