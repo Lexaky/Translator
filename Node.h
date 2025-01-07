@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include "Token.h"
+
 using namespace std;
 
 class Node {};
@@ -19,7 +21,7 @@ private:
 
 class MethodDeclarationNode : public Node {
 public:
-	MethodDeclarationNode() {};
+	MethodDeclarationNode() { isMain = false; };
 	void setMain(bool main);
 	void setReturnType(string type);
 	void setName(string name);
@@ -32,35 +34,25 @@ private:
 	map<string, string> params;
 	vector<Node> body;
 };
-//
-//class MethodCall : public Node {
-//public:
-//	MethodCall();
-//	void setMethodName(string methodName);
-//private:
-//	string methodName;
-//	vector<Node> params;
-//};
-//
 
-//Refactor declaration - extract common upper
-class VariableDeclarationNode : public Node {
+class SoutNode : public Node {
 public:
-	VariableDeclarationNode() {};
-	void setType(string type);
-	void setName(string name);
-	void setGlobal(bool isGlobal);
-	void setInitialization(bool hasInitialization);
-	void setValue(string value);
-	void setInitializer(Node node);
-	string getType();
+	SoutNode() {};
+	void setParams(vector<Token> params);
+	vector<Token> getParams();
 private:
-	string type;
-	string name;
-	bool isGlobal;
-	string value;
-	bool hasInitialization;
-	Node initializer;
+	vector<Token> params;
+};
+
+
+class MethodCall : public Node {
+public:
+	MethodCall() {};
+	void setMethodName(string methodName);
+	void setParams(vector<Token> params);
+private:
+	string methodName;
+	vector<Token> params;
 };
 
 class ConstDeclarationNode : public Node {
@@ -69,25 +61,34 @@ public:
 	void setType(string type);
 	void setName(string name);
 	void setGlobal(bool isGlobal);
-	void setValue(string value);
-	void setInitializer(Node node);
+	void setValue(Token value);
+	void setInitializer(vector<Token> initializer);
 	string getType();
 private:
 	string type;
 	string name;
 	bool isGlobal;
-	string value;
-	Node initializer;
+	Token value;
+	vector<Token> initializer;
 };
-//
-//class AssignmentNode : public Node {
-//public:
-//	AssignmentNode();
-//private:
-//	string variableName;
-//	string assignmentOperator;
-//	Node rightSide;
-//};
+
+class VariableDeclarationNode : public ConstDeclarationNode {
+public:
+	VariableDeclarationNode() { };
+	void setInitialization(bool hasInitialization);
+private:
+	bool hasInitialization;
+};
+
+class AssignmentNode : public Node {
+public:
+	AssignmentNode() {};
+	void setVariableName(string name);
+	void setRightSide(vector<Token> rightSide);
+private:
+	string variableName;
+	vector<Token> rightSide;
+};
 //
 //class UnaryOperator {
 //public:
@@ -105,45 +106,36 @@ private:
 //	string binaryOperator;
 //	string right;
 //};
-//
-//class Condition {
-//	//i dont know yet
-//};
-//
-//class WhileStatementNode : public Node {
-//public:
-//	WhileStatementNode();
-//	void setBody(vector<Node>);
-//private:
-//	Node condition;
-//	vector<Node> body;
-//};
-//
-//class ForStatementNode : public Node {
-//public:
-//	ForStatementNode();
-//	void setBody(vector<Node>);
-//private:
-//	VariableDeclarationNode init;
-//	Node condition;
-//	UnaryOperator modification;
-//	vector<Node> body;
-//};
-//
-//class IfElseStatementNode : public Node {
-//public:
-//	IfElseStatementNode();
-//private:
-//	Node condition;
-//	vector<Node> trueBody;
-//	bool hasElseStatement;
-//	vector<Node> falseBody;
-//};
-//
-//class ReturnStatementNode : public Node {
-//public:
-//	ReturnStatementNode();
-//	void setResult(Node result);
-//private:
-//	Node result;
-//};
+class CycleStatementNode : public Node {
+public:
+	CycleStatementNode() {};
+	void setFor(bool isFor);
+	void setCondition(vector<Token> condition);
+	void setBody(vector<Node> body);
+private:
+	bool isFor;		//otherwise while
+	vector<Token> conditiion;
+	vector<Node> body;
+};
+
+class IfElseStatementNode : public Node {
+public:
+	IfElseStatementNode() { hasElseStatement = false; };
+	void setCondition(vector<Token> condition);
+	void setTrueBody(vector<Node> body);
+	void setHasElseStatement(bool flag);
+	void setFalseBody(vector<Node> body);
+private:
+	vector<Token> condition;
+	vector<Node> trueBody;
+	bool hasElseStatement;
+	vector<Node> falseBody;
+};
+
+class ReturnStatementNode : public Node {
+public:
+	ReturnStatementNode() {};
+	void setResult(vector<Token> result);
+private:
+	vector<Token> result;
+};

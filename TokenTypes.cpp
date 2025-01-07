@@ -68,8 +68,7 @@ const std::map<std::string, std::string> TokenTypes::OPERATORS{
     {"&", "SHORT_AND"},
     {"||", "OR"},
     {"|", "SHORT_OR"},
-    {"!", "NOT"},
-    {":", "DOUBLE_DOT"}
+    {"!", "NOT"}
 };
 
 const std::map<std::string, char> TokenTypes::IGNORE{

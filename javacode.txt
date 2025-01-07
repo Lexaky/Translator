@@ -4,7 +4,7 @@ public class Main {
 	static final int b = 4;
 	public static void main (String[] args) {
 		int v = 124;
-		String b += "Bob";
+		String b = "Bob";
 		System.out.println(a+b);
 	}
 }

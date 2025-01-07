@@ -20,9 +20,14 @@ void ConstDeclarationNode::setGlobal(bool isGlobal)
 	this->isGlobal = isGlobal;
 }
 
-void ConstDeclarationNode::setValue(string value)
+void ConstDeclarationNode::setValue(Token value)
 {
 	this->value = value;
+}
+
+void ConstDeclarationNode::setInitializer(vector<Token> initializer)
+{
+	this->initializer = initializer;
 }
 
 string ConstDeclarationNode::getType()
@@ -30,34 +35,9 @@ string ConstDeclarationNode::getType()
 	return type;
 }
 
-void VariableDeclarationNode::setType(string type)
-{
-	this->type = type;
-}
-
-void VariableDeclarationNode::setName(string name)
-{
-	this->name = name;
-}
-
-void VariableDeclarationNode::setGlobal(bool isGlobal)
-{
-	this->isGlobal = isGlobal;
-}
-
 void VariableDeclarationNode::setInitialization(bool hasInitialization)
 {
 	this->hasInitialization = hasInitialization;
-}
-
-void VariableDeclarationNode::setValue(string value)
-{
-	this->value = value;
-}
-
-string VariableDeclarationNode::getType()
-{
-	return type;
 }
 
 void MethodDeclarationNode::setMain(bool main)
@@ -83,4 +63,69 @@ void MethodDeclarationNode::setParams(map<string, string> params)
 void MethodDeclarationNode::setBody(vector<Node>)
 {
 	this->body = body;
+}
+
+void SoutNode::setParams(vector<Token> params)
+{
+	this->params = params;
+}
+
+void MethodCall::setMethodName(string methodName)
+{
+	this->methodName = methodName;
+}
+
+void MethodCall::setParams(vector<Token> params)
+{
+	this->params = params;
+}
+
+void AssignmentNode::setVariableName(string name)
+{
+	this->variableName = name;
+}
+
+void AssignmentNode::setRightSide(vector<Token> rightSide)
+{
+	this->rightSide = rightSide;
+}
+
+void CycleStatementNode::setFor(bool isFor)
+{
+	this->isFor = isFor;
+}
+
+void CycleStatementNode::setCondition(vector<Token> condition)
+{
+	this->conditiion = conditiion;
+}
+
+void CycleStatementNode::setBody(vector<Node> body)
+{
+	this->body = body;
+}
+
+void IfElseStatementNode::setCondition(vector<Token> condition)
+{
+	this->condition = condition;
+}
+
+void IfElseStatementNode::setTrueBody(vector<Node> body)
+{
+	this->trueBody = body;
+}
+
+void IfElseStatementNode::setHasElseStatement(bool flag)
+{
+	this->hasElseStatement = flag;
+}
+
+void IfElseStatementNode::setFalseBody(vector<Node> body)
+{
+	this->falseBody = body;
+}
+
+void ReturnStatementNode::setResult(vector<Token> result)
+{
+	this->result = result;
 }

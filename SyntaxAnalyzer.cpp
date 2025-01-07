@@ -6,29 +6,13 @@ MainClassNode SyntaxAnalyzer::buildAst()
 {
 	vector<Node> nodes;
 	Token token = getNextToken();
-	if (token.getValue() != "public") {
-		string message = "Missing access modifier: public";
-		cout << message;
-		exit(1);
-	}
+	check("public", token);
 	token = getNextToken();
-	if (token.getValue() != "class") {
-		string message = "Missing keyword: class";
-		cout << message;
-		exit(1);
-	}
+	check("class", token);
 	token = getNextToken();
-	if (token.getValue() != "Main") {
-		string message = "Missing class name: Main";
-		cout << message;
-		exit(1);
-	}
+	check("Main", token);
 	token = getNextToken();
-	if (token.getValue() != "{") {
-		string message = "Expected: {";
-		cout << message;
-		exit(1);
-	}
+	check("{", token);
 	token = getNextToken();
 	while (token.getTokenType() != TokenTypesEnum::END_OF_FILE) {
 		if (token.getValue() == "}") {
@@ -98,15 +82,13 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
 		if (token.getValue() == "main") mainMethodExists = true;
 		string identifier = token.getValue();
 		token = getNextToken();
-		if (token.getValue() != "(") {
-			string message = "Expected '(', but was - " + token.getValue();
-			cout << message;
-			exit(1);
-		}
+		check("(", token);
 		nodes.push_back(parseMethod("void", identifier));
 	}
 	else if (token.getValue() == "final") {
-		nodes.push_back(parseClassConst());
+		ConstDeclarationNode node = parseConstDeclaration(classAtr);
+		node.setGlobal(true);
+		nodes.push_back(node);
 	}
 	else if (token.getTokenType() == TokenTypesEnum::DATA_TYPE) {
 		string dataType = token.getValue();
@@ -118,7 +100,10 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
 			nodes.push_back(parseMethod(dataType, identifier));
 		}
 		else {
-			nodes.push_back(parseClassVariable(dataType, identifier, token.getValue()));
+			resetReceivedToken();
+			VariableDeclarationNode node = parseVariableDeclaration(classAtr, dataType, identifier);
+			node.setGlobal(true);
+			nodes.push_back(node);
 		}
 	}
 	else {
@@ -128,67 +113,37 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
 	}
 }
 
-Node SyntaxAnalyzer::parseMethod(string returnType, string identifier)
+MethodDeclarationNode SyntaxAnalyzer::parseMethod(string returnType, string identifier)
 {
 	if (methods.count(identifier)) {	//Should add parameters check (method name isn't the only one condition)
 		string message = "Method '" + identifier + "' has already been declared";
 		cout << message;
 		exit(1);
 	}
-	methods.insert(identifier);
 	MethodDeclarationNode node;
 	node.setReturnType(returnType);
 	node.setName(identifier);
 
 	if (identifier == "main") {
 		checkMainSignature();
+		node.setMain(true);
 		//Set default params
 	}
-	else node.setParams(parseMethodParams());
+	else {
+		const map<string, string> params = parseMethodParams();
+		node.setParams(params);
+
+		vector<string> paramsDataTypes;
+		for (auto it = params.begin(); it != params.end(); ++it) {
+			paramsDataTypes.push_back(it->second);
+		}
+		methods[identifier] = paramsDataTypes;
+	}
 
 	Token token = getNextToken();
-	if (token.getValue() != "{") {
-		string message = "Expected '{', but was - " + token.getValue();
-		cout << message;
-		exit(1);
-	}
+	check("{", token);
 
-	token = getNextToken();
-	while (token.getValue() != "}" && token.getTokenType() != TokenTypesEnum::END_OF_FILE) {
-		string tokenValue = token.getValue();
-		//Declaration
-		if (token.getTokenType() == TokenTypesEnum::DATA_TYPE) {
-
-		}
-		//Const declaration
-		if (tokenValue == "final") {
-
-		}
-		if (token.getTokenType() == TokenTypesEnum::IDENTIFIER) {
-			token = getNextToken();
-			//Method invocation
-			if (token.getValue() == "(") {
-
-			}
-		}
-		if (tokenValue == "for" || tokenValue == "while") {
-
-		}
-		if (tokenValue == "if") {
-
-		}
-		
-		if (tokenValue == "System.out.println") {
-
-		}
-
-		token = getNextToken();
-	}
-	if (token.getValue() != "}") {
-		string message = "Expected '}' for method body";
-		cout << message;
-		exit(1);
-	}
+	node.setBody(parseBody());
 	
 	return node;
 }
@@ -260,11 +215,161 @@ map<string, string> SyntaxAnalyzer::parseMethodParams()
 	return params;
 }
 
-Node SyntaxAnalyzer::parseClassConst()
+vector<Node> SyntaxAnalyzer::parseBody()
+{
+	vector<Node> body;
+	map<string, string> bodyVars;
+	Token token = getNextToken();
+	while (token.getValue() != "}") {
+		string tokenValue = token.getValue();
+		//Declaration
+		if (token.getTokenType() == TokenTypesEnum::DATA_TYPE) {
+			string dataType = token.getValue();
+			token = getNextToken();
+			checkIdentifier(token);
+			VariableDeclarationNode node = parseVariableDeclaration(bodyVars, dataType, token.getValue());
+			node.setGlobal(false);
+			body.push_back(node);
+		}
+		//Const declaration
+		else if (tokenValue == "final") {
+			ConstDeclarationNode node = parseConstDeclaration(bodyVars);
+			node.setGlobal(false);
+			body.push_back(node);
+		}
+		else if (token.getTokenType() == TokenTypesEnum::IDENTIFIER) {
+			const string name = token.getValue();
+			token = getNextToken();
+			//Method invocation
+			if (token.getValue() == "(") {
+				body.push_back(parseMethodCall(name, bodyVars));
+			}
+			//var
+			else {
+				resetReceivedToken();
+				body.push_back(parseAssignment(name));
+			}
+		}
+		else if (tokenValue == "for" || tokenValue == "while") {
+			body.push_back(parseCycleStatement(tokenValue));
+		}
+		else if (tokenValue == "if") {
+			body.push_back(parseIf());
+		}
+
+		else if (tokenValue == "System.out.println") {
+			body.push_back(parseSout());
+		}
+		
+		else if (tokenValue == "return") {
+			body.push_back(parseReturnStatement());
+		}
+
+		token = getNextToken();
+	}
+	return body;
+}
+
+MethodCall SyntaxAnalyzer::parseMethodCall(const string& methodName, const map<string, string>& methodVars)
+{
+	if (!methods.count(methodName)) {
+		string message = "Unknown identifier - " + methodName;
+		cout << message;
+		exit(1);
+	}
+	vector<string> expectedParamsDataTypes = methods.at(methodName);
+	Token token = getNextToken();
+	int paramIndex = 0;
+	vector<Token> params;
+	while (token.getValue() != ")") {	//for now doesn't handles expressions
+		string expectedDataType = expectedParamsDataTypes.at(paramIndex++);
+		if (token.getTokenType() == TokenTypesEnum::BOOLEAN || token.getTokenType() == TokenTypesEnum::CHAR
+			|| token.getTokenType() == TokenTypesEnum::STRING || token.getTokenType() == TokenTypesEnum::FLOAT
+			|| token.getTokenType() == TokenTypesEnum::INT) {
+			checkTypeValueCompatibility(expectedDataType, token.getTokenType());
+		}
+		else {
+			checkIdentifier(token);
+			if (classAtr.count(token.getValue())) {
+				string actualDataType = classAtr.at(token.getValue());
+				if (actualDataType != expectedDataType) {
+					string message = "Expected data type '" + expectedDataType + "', but was - " + actualDataType;
+					cout << message;
+					exit(1);
+				}
+			}
+			else if (methodVars.count(token.getValue())) {
+				string actualDataType = methodVars.at(token.getValue());
+				if (actualDataType != expectedDataType) {
+					string message = "Expected data type '" + expectedDataType + "', but was - " + actualDataType;
+					cout << message;
+					exit(1);
+				}
+			}
+			else {
+				string message = "Unknown identifier - " + token.getValue();
+				cout << message;
+				exit(1);
+			}
+		}
+		params.push_back(token);
+		token = getNextToken();
+		check(",", token);
+		token = getNextToken();
+	}
+	token = getNextToken();
+	check(";", token);
+	MethodCall node;
+	node.setMethodName(methodName);
+	node.setParams(params);
+	return node;
+}
+
+AssignmentNode SyntaxAnalyzer::parseAssignment(const string& varName)
+{
+	AssignmentNode node;
+	node.setVariableName(varName);
+	Token token = getNextToken();
+	check("=", token);
+	token = getNextToken();
+	vector<Token> expression;
+	while (token.getValue() != ";") {
+		if (token.getTokenType() != TokenTypesEnum::OPERATOR && token.getTokenType() != TokenTypesEnum::BOOLEAN
+			&& token.getTokenType() != TokenTypesEnum::CHAR && token.getTokenType() != TokenTypesEnum::FLOAT
+			&& token.getTokenType() != TokenTypesEnum::INT && token.getTokenType() != TokenTypesEnum::STRING
+			&& token.getTokenType() != TokenTypesEnum::IDENTIFIER && token.getValue() != "("
+			&& token.getValue() != ")") {
+			string message = "Value of unexpected type - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+		expression.push_back(token);
+	}
+}
+
+SoutNode SyntaxAnalyzer::parseSout()
+{
+	Token token = getNextToken();
+	check("(", token);
+	token = getNextToken();
+	vector<Token> soutTokens;
+	while (token.getValue() != ")") {  //make validation more complicated
+		checkTokenForConditionOrExpression(token);
+		//check identifiers
+		soutTokens.push_back(token);
+		token = getNextToken();
+	}
+	token = getNextToken();
+	check(";", token);
+	SoutNode node;
+	node.setParams(soutTokens);
+	
+	return node;
+}
+
+ConstDeclarationNode SyntaxAnalyzer::parseConstDeclaration(map<string, string>& earlierDeclaredVars)
 {
 	ConstDeclarationNode node;
-	node.setGlobal(true);
-
 	//Data type
 	Token token = getNextToken();
 	checkDataType(token);
@@ -273,98 +378,55 @@ Node SyntaxAnalyzer::parseClassConst()
 	//Identifier
 	token = getNextToken();
 	checkIdentifier(token);
-	if (globalConst.count(token.getValue())) {
-		string message = "Final variable '" + token.getValue() + "' has already been declared";
-		cout << message;
-		exit(1);
-	}
-	globalConst.insert(token.getValue());
+	const string identifier = token.getValue();
+	checkUniqueClassAttribute(earlierDeclaredVars, identifier);
+	const string type = "const";
+	earlierDeclaredVars[identifier] = type;
 	node.setName(token.getValue());
 	
 	//Assignment symbol
 	token = getNextToken();
-	if (token.getValue() != "=") {
-		string message = "Expected assignment symbol, but was - " + token.getValue();
-		cout << message;
-		exit(1);
-	}
+	check("=", token);
 
-	//Value or expression
-	token = getNextToken();
-	Token secondToken = getNextToken();
-	//Value
-	if (secondToken.getValue() == ";") {
-		if (node.getType() == "String" && token.getTokenType() == TokenTypesEnum::STRING
-			|| node.getType() == "char" && token.getTokenType() == TokenTypesEnum::CHAR
-			|| node.getType() == "boolean" && token.getTokenType() == TokenTypesEnum::BOOLEAN) {
-			node.setValue(token.getValue());
-		}
-		else if ((node.getType() == "int" || node.getType() == "long" || node.getType() == "short" || node.getType() == "byte")
-			&& token.getTokenType() == TokenTypesEnum::INT) {
-			node.setValue(token.getValue());
-		}
-		else if ((node.getType() == "float" || node.getType() == "double") && token.getTokenType() == TokenTypesEnum::FLOAT) {
-			node.setValue(token.getValue());
-		}
-		else {
-			string message = "Data type '" + node.getType() + "' doesn't match value - " + token.getValue();
-			cout << message;
-			exit(1);
-		}
-	}
-	//Expression
-	else {
-		//Not implemented yet!!!!!!!!!!!!!!!!!!!!!!!!!!
-		string message = "Expression parsing is not implemented";
-		cout << message;
-		exit(1);
-	}
+	parseDeclarationAssignment(node);
 
 	return node;
 }
 
-//Refactor Ctrl + C / Ctrl + V
-Node SyntaxAnalyzer::parseClassVariable(string dataType, string identifier, string thirdTokenValue)
+VariableDeclarationNode SyntaxAnalyzer::parseVariableDeclaration(map<string, string>& earlierDeclaredVars, string dataType, string identifier)
 {
-	if (globalVars.count(identifier)) {
-		string message = "Variable '" + identifier + "' has already been declared";
-		cout << message;
-		exit(1);
-	}
-	globalVars.insert(identifier);
+	checkUniqueClassAttribute(earlierDeclaredVars, identifier);
+	const string type = "var";
+	earlierDeclaredVars[identifier] = type;
 
 	VariableDeclarationNode node;
-	node.setGlobal(true);
 	node.setType(dataType);
 	node.setName(identifier);
 
 	//Assignment symbol or semicolon
-	if (thirdTokenValue == ";") {
+	Token token = getNextToken();
+	if (token.getValue() == ";") {
 		node.setInitialization(false);
 		return node;
 	}
-	if (thirdTokenValue != "=") {
-		string message = "Expected assignment symbol, but was - " + thirdTokenValue;
-		cout << message;
-		exit(1);
-	}
+	check("=", token);
+	node.setInitialization(true);
 
+	parseDeclarationAssignment(node);
+
+	return node;
+}
+
+void SyntaxAnalyzer::parseDeclarationAssignment(ConstDeclarationNode& node)
+{
 	//Value or expression
 	Token token = getNextToken();
 	Token secondToken = getNextToken();
 	//Value
 	if (secondToken.getValue() == ";") {
-		if (node.getType() == "String" && token.getTokenType() == TokenTypesEnum::STRING
-			|| node.getType() == "char" && token.getTokenType() == TokenTypesEnum::CHAR
-			|| node.getType() == "boolean" && token.getTokenType() == TokenTypesEnum::BOOLEAN) {
-			node.setValue(token.getValue());
-		}
-		else if ((node.getType() == "int" || node.getType() == "long" || node.getType() == "short" || node.getType() == "byte")
-			&& token.getTokenType() == TokenTypesEnum::INT) {
-			node.setValue(token.getValue());
-		}
-		else if ((node.getType() == "float" || node.getType() == "double") && token.getTokenType() == TokenTypesEnum::FLOAT) {
-			node.setValue(token.getValue());
+		bool flag = checkTypeValueCompatibility(node.getType(), token.getTokenType());
+		if (flag) {
+			node.setValue(token);
 		}
 		else {
 			string message = "Data type '" + node.getType() + "' doesn't match value - " + token.getValue();
@@ -374,13 +436,203 @@ Node SyntaxAnalyzer::parseClassVariable(string dataType, string identifier, stri
 	}
 	//Expression
 	else {
-		//Not implemented yet!!!!!!!!!!!!!!!!!!!!!!!!!!
-		string message = "Expression parsing is not implemented";
+		vector<Token> initializer;
+		checkTokenForConditionOrExpression(secondToken);
+		initializer.push_back(secondToken);
+		token = getNextToken();
+		while (token.getValue() != ";") {
+			checkTokenForConditionOrExpression(token);
+			initializer.push_back(token);
+			token = getNextToken();
+		}
+		node.setInitializer(initializer);
+	}
+}
+
+IfElseStatementNode SyntaxAnalyzer::parseIf()
+{
+	IfElseStatementNode node;
+	Token token = getNextToken();
+	check("(", token);
+	node.setCondition(parseWhileCondition()); //same logic fow now
+	token = getNextToken();
+	check("{", token);
+	node.setTrueBody(parseBody());
+	token = getNextToken();
+	if (token.getValue() == "else") {
+		node.setHasElseStatement(true);
+		token = getNextToken();
+		check("{", token);
+		node.setFalseBody(parseBody());
+	}
+	else resetReceivedToken();
+	return node;
+}
+
+CycleStatementNode SyntaxAnalyzer::parseCycleStatement(const string& cycleKeyword)
+{
+	CycleStatementNode node;
+	Token token = getNextToken();
+	check("(", token);
+	//parse condition
+	vector<Token> condition;
+	if (cycleKeyword == "for") {
+		node.setFor(true);
+		condition = parseForCondition();
+	}
+	else {
+		node.setFor(false);
+		condition = parseWhileCondition();
+	}
+	token = getNextToken();
+	check("{", token);
+	//TODO handle break/continue statements
+	node.setBody(parseBody());
+	return node;
+}
+
+vector<Token> SyntaxAnalyzer::parseForCondition()
+{
+	vector<Token> condition;
+	Token token = getNextToken();
+	condition.push_back(token);
+	check("int", token);
+	token = getNextToken();
+	condition.push_back(token);
+	checkIdentifier(token);
+	const string iterator = token.getValue();
+	//check var wasn't earlier
+	token = getNextToken();
+	condition.push_back(token);
+	check("=", token);
+	token = getNextToken();
+	condition.push_back(token);
+	if (token.getTokenType() != TokenTypesEnum::INT) {
+		string message = "Expected integer value, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	token = getNextToken();
+	condition.push_back(token);
+	check(";", token);
+	token = getNextToken();
+	condition.push_back(token);
+	if (token.getValue() != iterator) {
+		string message = "Expected identifier '" + iterator + "', but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	token = getNextToken();
+	condition.push_back(token);
+	const string comparisonOperator = token.getValue();
+	if (comparisonOperator != "<" && comparisonOperator != ">"
+		&& comparisonOperator != "<=" && comparisonOperator != ">=") {
+		string message = "Expected comparison operator, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	token = getNextToken();
+	condition.push_back(token);
+	if (token.getTokenType() != TokenTypesEnum::INT) {
+		string message = "Expected integer value, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	token = getNextToken();
+	condition.push_back(token);
+	check(";", token);
+	token = getNextToken();
+	condition.push_back(token);
+	if (token.getValue() != iterator) {
+		string message = "Expected identifier '" + iterator + "', but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+	token = getNextToken();
+	condition.push_back(token);
+	if (token.getValue() != "++" && token.getValue() != "--") {
+		string message = "Expected increment or decrement, but was - " + token.getValue();
 		cout << message;
 		exit(1);
 	}
 
+	return condition;
+}
+
+vector<Token> SyntaxAnalyzer::parseWhileCondition()
+{
+	vector<Token> condition;
+	Token token = getNextToken();
+	check("(", token);
+	token = getNextToken();
+	while (token.getValue() != ")") {
+		if (token.getTokenType() != TokenTypesEnum::OPERATOR && token.getTokenType() != TokenTypesEnum::BOOLEAN
+			&& token.getTokenType() != TokenTypesEnum::CHAR && token.getTokenType() != TokenTypesEnum::FLOAT
+			&& token.getTokenType() != TokenTypesEnum::INT && token.getTokenType() != TokenTypesEnum::STRING
+			&& token.getTokenType() != TokenTypesEnum::IDENTIFIER && token.getValue() != "("
+			&& token.getValue() != ")") {
+			string message = "Value of unexpected type - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+		condition.push_back(token);
+		token = getNextToken();
+	}
+	return condition;
+}
+
+ReturnStatementNode SyntaxAnalyzer::parseReturnStatement()
+{
+	Token token = getNextToken();
+	vector<Token> returnResult;
+	while (token.getValue() != ";") {
+		returnResult.push_back(token);
+		token = getNextToken();
+	}
+	ReturnStatementNode node;
+	node.setResult(returnResult);
 	return node;
+}
+
+bool SyntaxAnalyzer::checkTypeValueCompatibility(const string& dataType, const TokenTypesEnum& value)
+{
+	if (dataType == "String" && value == TokenTypesEnum::STRING
+		|| dataType == "char" && value == TokenTypesEnum::CHAR
+		|| dataType == "boolean" && value == TokenTypesEnum::BOOLEAN) {
+		return true;
+	}
+	else if ((dataType == "int" || dataType == "long" || dataType == "short" || dataType == "byte")
+		&& value == TokenTypesEnum::INT) {
+		return true;
+	}
+	else if ((dataType == "float" || dataType == "double") && value == TokenTypesEnum::FLOAT) {
+		return true;
+	}
+	else {
+		false;
+	}
+}
+
+void SyntaxAnalyzer::check(const string& expected, const Token& token)
+{
+	if (token.getValue() != expected) {
+		string message = "Expected '" + expected + "', but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+}
+
+void SyntaxAnalyzer::checkTokenForConditionOrExpression(const Token& token)
+{
+	if (token.getTokenType() != TokenTypesEnum::OPERATOR && token.getTokenType() != TokenTypesEnum::BOOLEAN
+		&& token.getTokenType() != TokenTypesEnum::CHAR && token.getTokenType() != TokenTypesEnum::FLOAT
+		&& token.getTokenType() != TokenTypesEnum::INT && token.getTokenType() != TokenTypesEnum::STRING
+		&& token.getTokenType() != TokenTypesEnum::IDENTIFIER && token.getValue() != "("
+		&& token.getValue() != ")") {
+		string message = "Value of unexpected type - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
 }
 
 void SyntaxAnalyzer::checkDataType(const Token& token)
@@ -396,6 +648,15 @@ void SyntaxAnalyzer::checkIdentifier(const Token& token)
 {
 	if (token.getTokenType() != TokenTypesEnum::IDENTIFIER) {
 		string message = "Expected identifier, but was - " + token.getValue();
+		cout << message;
+		exit(1);
+	}
+}
+
+void SyntaxAnalyzer::checkUniqueClassAttribute(map<string, string>& earlierDeclaredVars, const string& identifier)
+{
+	if (earlierDeclaredVars.count(identifier)) {
+		string message = "Class attribute '" + identifier + "' has already been declared";
 		cout << message;
 		exit(1);
 	}
