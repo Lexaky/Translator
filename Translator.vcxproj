@@ -131,6 +131,7 @@
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="SyntaxAnalyzer.cpp" />
+    <ClCompile Include="TokenMapper.cpp" />
     <ClCompile Include="TokenTypes.cpp" />
     <ClCompile Include="Op.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Rules.h" />
     <ClInclude Include="SyntaxAnalyzer.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="TokenMapper.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Translator.h" />
   </ItemGroup>

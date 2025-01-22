@@ -15,4 +15,7 @@ public:
 	Token():value("0"),tokenType(UNKNOWN) {}
 	std::string getValue() const;
 	TokenTypesEnum getTokenType() const;
+	void setValue(std::string newValue) {
+		value = newValue;
+	}
 };

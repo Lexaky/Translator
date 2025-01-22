@@ -16,6 +16,8 @@ class SyntaxAnalyzer {
 public:
 	explicit SyntaxAnalyzer(const std::vector<Token>& tokens);
 	MainClassNode buildAst();
+	
+
 private:
 	vector<Token> tokens;
 	int index = 0;

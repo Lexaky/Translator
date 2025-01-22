@@ -2,9 +2,15 @@ public class Main {
 	private static String a = "Hello world!";
 	protected static char g;
 	static final int b = 4;
+	public static void getAnotherValue(int bs, int allowed, char haro) {
+		int aa = 0;
+	}
 	public static void main (String[] args) {
 		int v = 124;
-		String b = "Bob";
+		String b = "Bob Marley";
+		if (v == 124) {
+			v = 321;
+		}
 		System.out.println(a+b);
 	}
 }

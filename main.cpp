@@ -9,6 +9,7 @@
 #include "Node.h"
 #include "SyntaxAnalyzer.h"
 
+#include "TokenMapper.h"
 using namespace std;
 
 int main() {
@@ -38,8 +39,9 @@ int main() {
 		std::cout << "Value: " << variable.at(i).getValue() << std::endl;
 	}
 
-	SyntaxAnalyzer syntaxAnalyzer(variable);
-	MainClassNode ast = syntaxAnalyzer.buildAst();
-
+	//SyntaxAnalyzer syntaxAnalyzer(variable);
+	//MainClassNode ast = syntaxAnalyzer.buildAst();
+	TokenMapper *tm = new TokenMapper(variable);
+	tm->printPascalCode();
 	return 0;
 }
