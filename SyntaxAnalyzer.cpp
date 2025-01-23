@@ -59,7 +59,7 @@ MainClassNode SyntaxAnalyzer::buildAst()
 
 Token SyntaxAnalyzer::getNextToken()
 {
- 	Token token = tokens.at(index++);
+	Token token = tokens.at(index++);
 	if (token.getTokenType() == TokenTypesEnum::END_OF_FILE && !classCloseBracketExists) {
 		string message = "Reached end of file. Class doesn't have close bracket '}'";
 		cout << message;
@@ -144,7 +144,7 @@ MethodDeclarationNode SyntaxAnalyzer::parseMethod(string returnType, string iden
 	check("{", token);
 
 	node.setBody(parseBody());
-	
+
 	return node;
 }
 
@@ -260,7 +260,7 @@ vector<Node> SyntaxAnalyzer::parseBody()
 		else if (tokenValue == "System.out.println") {
 			body.push_back(parseSout());
 		}
-		
+
 		else if (tokenValue == "return") {
 			body.push_back(parseReturnStatement());
 		}
@@ -344,7 +344,9 @@ AssignmentNode SyntaxAnalyzer::parseAssignment(const string& varName)
 			exit(1);
 		}
 		expression.push_back(token);
+		token = getNextToken();
 	}
+	return node;
 }
 
 SoutNode SyntaxAnalyzer::parseSout()
@@ -363,7 +365,7 @@ SoutNode SyntaxAnalyzer::parseSout()
 	check(";", token);
 	SoutNode node;
 	node.setParams(soutTokens);
-	
+
 	return node;
 }
 
@@ -383,7 +385,7 @@ ConstDeclarationNode SyntaxAnalyzer::parseConstDeclaration(map<string, string>& 
 	const string type = "const";
 	earlierDeclaredVars[identifier] = type;
 	node.setName(token.getValue());
-	
+
 	//Assignment symbol
 	token = getNextToken();
 	check("=", token);
@@ -452,10 +454,8 @@ void SyntaxAnalyzer::parseDeclarationAssignment(ConstDeclarationNode& node)
 IfElseStatementNode SyntaxAnalyzer::parseIf()
 {
 	IfElseStatementNode node;
-	Token token = getNextToken();
-	check("(", token);
 	node.setCondition(parseWhileCondition()); //same logic fow now
-	token = getNextToken();
+	Token token = getNextToken();
 	check("{", token);
 	node.setTrueBody(parseBody());
 	token = getNextToken();
@@ -472,8 +472,6 @@ IfElseStatementNode SyntaxAnalyzer::parseIf()
 CycleStatementNode SyntaxAnalyzer::parseCycleStatement(const string& cycleKeyword)
 {
 	CycleStatementNode node;
-	Token token = getNextToken();
-	check("(", token);
 	//parse condition
 	vector<Token> condition;
 	if (cycleKeyword == "for") {
@@ -484,7 +482,7 @@ CycleStatementNode SyntaxAnalyzer::parseCycleStatement(const string& cycleKeywor
 		node.setFor(false);
 		condition = parseWhileCondition();
 	}
-	token = getNextToken();
+	Token token = getNextToken();
 	check("{", token);
 	//TODO handle break/continue statements
 	node.setBody(parseBody());
@@ -495,6 +493,8 @@ vector<Token> SyntaxAnalyzer::parseForCondition()
 {
 	vector<Token> condition;
 	Token token = getNextToken();
+	check("(", token);
+	token = getNextToken();
 	condition.push_back(token);
 	check("int", token);
 	token = getNextToken();
@@ -555,6 +555,8 @@ vector<Token> SyntaxAnalyzer::parseForCondition()
 		cout << message;
 		exit(1);
 	}
+	token = getNextToken();
+	check(")", token);
 
 	return condition;
 }

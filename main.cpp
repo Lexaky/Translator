@@ -35,12 +35,14 @@ int main() {
 	Parser parser("javacode.txt");
 	std::vector<Token> variable = lexer.extractTokens(parser.getText());
 	for (int i = 0; i < variable.size(); i++) {
-		std::cout << "Type: " << variable.at(i).getTokenType() << std::endl;
-		std::cout << "Value: " << variable.at(i).getValue() << std::endl;
+		std::cout << i << ": Type: " << variable.at(i).getTokenType() << "    Value: " << variable.at(i).getValue() << std::endl;
 	}
 
-	//SyntaxAnalyzer syntaxAnalyzer(variable);
-	//MainClassNode ast = syntaxAnalyzer.buildAst();
+	SyntaxAnalyzer syntaxAnalyzer(variable);
+	MainClassNode ast = syntaxAnalyzer.buildAst();
+
+	//Semantic analizer here
+
 	TokenMapper *tm = new TokenMapper(variable);
 	tm->printPascalCode();
 	return 0;

@@ -75,7 +75,8 @@ private:
         {"System.out.println", "writeln"},
         {"System.out.print", "write"},
         {"import", "uses"},
-        {"public static void main", "begin"}
+        {"public static void main", "begin"},
+        {"\"", "\'"}
 	};
 
     std::map<std::string, std::string> deleteTypes = {
@@ -95,7 +96,6 @@ private:
     void generateMethods(std::string methodName, std::vector<std::string> varNames,
         std::vector<std::string>, std::vector <Token> tokens);
     void globalGenerator(std::vector<Token> tokens);
-    void globalGeneratorWithFunctionReturnable(std::vector<Token> tokens, std::string functionName);
     void ifGenerator(std::vector<Token> tokens);
     void whileGenerator(std::vector<Token> tokens);
     void elseGenerator(std::vector<Token> tokens);

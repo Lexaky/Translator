@@ -16,15 +16,17 @@ vector<Token> Lexer::extractTokens(string sourceCode) {
 		if (ch == "\"" && !isStringNow) {
 			isStringNow = true;
 			continue;
-		} else if (ch == "\"" && isStringNow) {
+		}
+		else if (ch == "\"" && isStringNow) {
 			tokens.push_back(Token(tmp, TokenTypesEnum::STRING));
 			tmp = "";
 			isStringNow = false;
 			continue;
-		} else if (isStringNow) {
+		}
+		else if (isStringNow) {
 			if (i == size - 1) {
 				string message = "Missing closing double quote in line " + to_string(line) + " position "
-					+ to_string(position+1) + "\n";
+					+ to_string(position + 1) + "\n";
 				cout << message;
 				exit(1);
 			}
@@ -39,13 +41,15 @@ vector<Token> Lexer::extractTokens(string sourceCode) {
 		if (ch == "'") {
 			if (i + 2 < size && string(1, trimedCode.at(i + 2)) == "'") {
 				tokens.push_back(Token(string(1, trimedCode.at(i + 1)), TokenTypesEnum::CHAR));
-			} else {
+			}
+			else {
 				string message = "Missing closing quote in line " + to_string(line) + " position "
 					+ to_string(position + 2) + "\n";
 				cout << message;
 				exit(1);
 			}
 			i += 2;
+			continue;
 		}
 
 		if (!AllowedSymbols::ALLOWED_SYMBOLS.count(ch)) {
@@ -59,7 +63,8 @@ vector<Token> Lexer::extractTokens(string sourceCode) {
 			if (ch == "\n") {
 				++line;
 				position = 0;
-			} else if (ch == "\t") {
+			}
+			else if (ch == "\t") {
 				position += 4;
 			}
 			if (!tmp.empty()) {
@@ -86,7 +91,7 @@ vector<Token> Lexer::extractTokens(string sourceCode) {
 			}
 			if (i + 1 < size)
 			{
-				auto additionalCh = string(1, trimedCode.at(i+1));
+				auto additionalCh = string(1, trimedCode.at(i + 1));
 				if (TokenTypes::OPERATORS.count(ch + additionalCh))
 				{
 					ch += additionalCh;
