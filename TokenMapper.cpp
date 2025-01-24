@@ -224,7 +224,7 @@ void TokenMapper::generateFunction(std::string functionName, std::string functio
     for (int i = 0; i < varNames.size(); i++) {
         if (varTypes.at(i).at(varTypes.at(i).size() - 1) == '_')
         {
-            std::cout << varNames.at(i) << " : " << varTypes.at(i);
+            std::cout << varNames.at(i) << " : " << varTypes.at(i).substr(0, varTypes.at(i).size() - 1);
             if (i + 1 != varNames.size())
                 std::cout << "; ";
         }
@@ -246,7 +246,6 @@ void TokenMapper::generateFunction(std::string functionName, std::string functio
             newTokens.push_back(returnToken);
             Token equalToken("=", OPERATOR);
             newTokens.push_back(equalToken);
-            i++;
         }
         else {
             newTokens.push_back(tokens.at(i));
@@ -374,6 +373,14 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
             std::cout << "\n";
             continue;
         }
+        else if (tokens.at(i).getValue() == "++" && tokens.at(i).getTokenType() == OPERATOR) {
+            std::cout << ":= " << tokens.at(i - 1).getValue() << " + 1";
+            continue;
+        }
+        else if (tokens.at(i).getValue() == "--" && tokens.at(i).getTokenType() == OPERATOR) {
+            std::cout << ":= " << tokens.at(i - 1).getValue() << " - 1";
+            continue;
+        }
         auto it = deleteTypes.find(tokens.at(i).getValue());
         if (it == deleteTypes.end()) {
             auto it1 = JavaToPascalTokens.find(tokens.at(i).getValue());
@@ -480,7 +487,7 @@ void TokenMapper::elseGenerator(std::vector<Token> tokens) {
 }
 
 void TokenMapper::forGenerator(std::vector<Token> tokens) {
-    std::cout << "for ";
+    std::cout << "while ";
     int i = 1;
     std::vector <Token> forInit;
     forInit.reserve(tokens.size());
@@ -516,67 +523,35 @@ void TokenMapper::forGenerator(std::vector<Token> tokens) {
     std::vector<Token> insideFor;
     insideFor.reserve(tokens.size());
     
-    bool flagNegative = false;
-    bool flagPositive = false;
-
-    globalGenerator(firstPart);
+    globalGenerator(secondPart);
     
-
-    std::string leftIdentifierName;
-    bool isIdentifierFound = false;
-
-    for (int k = 0; k < firstPart.size(); k++) {
-        if (firstPart.at(k).getTokenType() == IDENTIFIER) {
-            leftIdentifierName = firstPart.at(k).getValue();
-            isIdentifierFound = true;
+    int nestedLevel = 1;
+    std::cout << "do begin\n";
+    if (tokens.at(j).getValue() == ")")
+        j++;
+    if (tokens.at(j).getValue() == "{")
+        j++;
+    while (tokens.at(j).getValue() != "}" && nestedLevel != 0) {
+        if (tokens.at(j).getValue() == "{") {
+            nestedLevel++;
+        }
+        if (tokens.at(j).getValue() == "}" && nestedLevel - 1 == 0) {
+            nestedLevel--;
+            globalGenerator(insideFor);
             break;
         }
-    }
-    
-    if (isIdentifierFound == false) {
-        leftIdentifierName = "i";
-    }
-
-    for (int k = secondPart.size() - 1; k >= 0; k--) {
-        if (secondPart.at(k).getTokenType() == OPERATOR) {
-            if (secondPart.at(k).getValue() == leftIdentifierName &&
-                (secondPart.at(k).getValue() == "<" ||
-                secondPart.at(k).getValue() == "<=" ||
-                secondPart.at(k).getValue() == "!=" ||
-                secondPart.at(k).getValue() == "==")) {
-                flagPositive = true;
-                break;
-            }
-            else if ()
-            else {
-                flagNegative = true;
-                break;
-            }
+        else if (tokens.at(j).getValue() == "}" && nestedLevel > 0) {
+            nestedLevel--;
         }
+        insideFor.push_back(tokens.at(j));
+        j++;
     }
 
-    if (flagPositive == true) {
-        std::cout << " to ";
-    }
-    else {
-        std::cout << " downto ";
-    }
-
-    for (int k = 0; k < secondPart.size(); k++) {
-        if (secondPart.at(k).getTokenType() == IDENTIFIER && secondPart.at(k).getValue() != leftIdentifierName) {
-            std::cout << secondPart.at(k).getValue() << " ";
-        }
-        else if (secondPart.at(k).getTokenType() == INT || secondPart.at(k).getTokenType() == FLOAT) {
-
-        }
-        else {
-            //string or char
-
-        }
-    }
-    std::cout << "do begin\n";
-
+    globalGenerator(insideFor);
     //forInside here
+    std::cout << "\n";
+    globalGenerator(thirdPart);
+    std::cout << ";\n";
 
     std::cout << "end;";
 }
