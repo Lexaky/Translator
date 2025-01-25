@@ -308,8 +308,13 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
             ifTokens.push_back(tokens.at(j));
             ifGenerator(ifTokens);
             i = j + 1;
-            if (tokens.at(i).getValue() != "else") {
+            if (i < tokens.size() && tokens.at(i).getValue() != "else") {
                 std::cout << ";";
+                continue;
+            }
+            else if (i >= tokens.size()) {
+                std::cout << ";\n";
+                continue;
             }
             std::cout << "\n";
             ifTokens.clear();
@@ -329,8 +334,8 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
                 ifTokens.push_back(tokens.at(j));
                 elseGenerator(ifTokens);
                 i = j + 1;
-                continue;
                 std::cout << "\n";
+                continue;
             }
         }
         else if (tokens.at(i).getValue() == "while") {
@@ -531,13 +536,13 @@ void TokenMapper::forGenerator(std::vector<Token> tokens) {
         j++;
     if (tokens.at(j).getValue() == "{")
         j++;
-    while (tokens.at(j).getValue() != "}" && nestedLevel != 0) {
+    while ((j < tokens.size() && tokens.at(j).getValue() != "}") || nestedLevel != 0) {
         if (tokens.at(j).getValue() == "{") {
             nestedLevel++;
         }
         if (tokens.at(j).getValue() == "}" && nestedLevel - 1 == 0) {
             nestedLevel--;
-            globalGenerator(insideFor);
+            insideFor.push_back(tokens.at(j));
             break;
         }
         else if (tokens.at(j).getValue() == "}" && nestedLevel > 0) {

@@ -38,8 +38,8 @@ int main() {
 		std::cout << i << ": Type: " << variable.at(i).getTokenType() << "    Value: " << variable.at(i).getValue() << std::endl;
 	}
 
-	SyntaxAnalyzer syntaxAnalyzer(variable);
-	MainClassNode ast = syntaxAnalyzer.buildAst();
+	//SyntaxAnalyzer syntaxAnalyzer(variable);
+	//MainClassNode ast = syntaxAnalyzer.buildAst();
 
 	//Semantic analizer here
 
