@@ -14,12 +14,12 @@ class Node {};
 class MainClassNode : public Node {
 public:
 	MainClassNode() {};
-	void setBody(vector<Node> body);
-	vector<Node> getBody() {
+	void setBody(vector<shared_ptr<Node>> body);
+	vector<shared_ptr<Node>> getBody() {
 		return body;
 	}
 private:
-	vector<Node> body;
+	vector<shared_ptr<Node>> body;
 };
 
 class MethodDeclarationNode : public Node {
@@ -29,7 +29,7 @@ public:
 	void setReturnType(string type);
 	void setName(string name);
 	void setParams(map<string, string> params);
-	void setBody(vector<Node> body);
+	void setBody(vector<shared_ptr<Node>> body);
 	bool isMainMethod() {
 		return isMain;
 	}
@@ -42,7 +42,7 @@ public:
 	map<string, string> getParams() {
 		return params;
 	}
-	vector<Node> getBody() {
+	vector<shared_ptr<Node>> getBody() {
 		return body;
 	}
 private:
@@ -50,7 +50,7 @@ private:
 	string returnType;
 	string name;
 	map<string, string> params;
-	vector<Node> body;
+	vector<shared_ptr<Node>> body;
 };
 
 class SoutNode : public Node {
@@ -156,8 +156,8 @@ public:
 	CycleStatementNode() {};
 	void setFor(bool isFor);
 	void setCondition(vector<Token> condition);
-	void setBody(vector<Node> body);
-	vector<Node> getBody() {
+	void setBody(vector<shared_ptr<Node>> body);
+	vector<shared_ptr<Node>> getBody() {
 		return body;
 	}
 	vector <Token> getTokens() {
@@ -166,23 +166,23 @@ public:
 private:
 	bool isFor;		//otherwise while
 	vector<Token> conditiion;
-	vector<Node> body;
+	vector<shared_ptr<Node>> body;
 };
 
 class IfElseStatementNode : public Node {
 public:
 	IfElseStatementNode() { hasElseStatement = false; };
 	void setCondition(vector<Token> condition);
-	void setTrueBody(vector<Node> body);
+	void setTrueBody(vector<shared_ptr<Node>> body);
 	void setHasElseStatement(bool flag);
-	void setFalseBody(vector<Node> body);
+	void setFalseBody(vector<shared_ptr<Node>> body);
 	vector <Token> getTokens() {
 		return condition;
 	}
-	vector <Node> getBody() {
+	vector <shared_ptr<Node>> getBody() {
 		return trueBody;
 	}
-	vector<Node> getFalseBody() {
+	vector<shared_ptr<Node>> getFalseBody() {
 		return falseBody;
 	}
 	bool isElse() {
@@ -190,9 +190,9 @@ public:
 	}
 private:
 	vector<Token> condition;
-	vector<Node> trueBody;
+	vector<shared_ptr<Node>> trueBody;
 	bool hasElseStatement;
-	vector<Node> falseBody;
+	vector<shared_ptr<Node>> falseBody;
 };
 
 class ReturnStatementNode : public Node {

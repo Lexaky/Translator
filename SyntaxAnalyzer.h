@@ -28,11 +28,11 @@ private:
 
 	Token getNextToken();
 	void resetReceivedToken();
-	void checkTokensAfterStaticKeyword(vector<Node> &nodes);
+	void checkTokensAfterStaticKeyword(vector<shared_ptr<Node>> &nodes);
 	MethodDeclarationNode parseMethod(string returnType, string identifier);
 	void checkMainSignature();
 	map<string, string> parseMethodParams();
-	vector<Node> parseBody(); //for method, if and cycles bodies
+	void parseBody(vector<shared_ptr<Node>>& body); //for method, if and cycles bodies
 	MethodCall parseMethodCall(const string& methodName, const map<string, string>& methodVars);
 	AssignmentNode parseAssignment(const string& varName);
 	SoutNode parseSout();

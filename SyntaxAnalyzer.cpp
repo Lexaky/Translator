@@ -4,7 +4,7 @@ SyntaxAnalyzer::SyntaxAnalyzer(const vector<Token>& tokens) : tokens(tokens) {}
 
 MainClassNode SyntaxAnalyzer::buildAst()
 {
-	vector<Node> nodes;
+	vector<shared_ptr<Node>> nodes;
 	Token token = getNextToken();
 	check("public", token);
 	token = getNextToken();
@@ -73,7 +73,7 @@ void SyntaxAnalyzer::resetReceivedToken()
 	--index;
 }
 
-void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
+void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<shared_ptr<Node>>& nodes)
 {
 	Token token = getNextToken();
 	if (token.getValue() == "void") {
@@ -83,11 +83,14 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
 		string identifier = token.getValue();
 		token = getNextToken();
 		check("(", token);
-		nodes.push_back(parseMethod("void", identifier));
+		auto node = make_shared<MethodDeclarationNode>();
+		*node = parseMethod("void", identifier);
+		nodes.push_back(node);
 	}
 	else if (token.getValue() == "final") {
-		ConstDeclarationNode node = parseConstDeclaration(classAtr);
-		node.setGlobal(true);
+		auto node = make_shared<ConstDeclarationNode>();
+		*node = parseConstDeclaration(classAtr);
+		node->setGlobal(true);
 		nodes.push_back(node);
 	}
 	else if (token.getTokenType() == TokenTypesEnum::DATA_TYPE) {
@@ -97,12 +100,15 @@ void SyntaxAnalyzer::checkTokensAfterStaticKeyword(vector<Node>& nodes)
 		string identifier = token.getValue();
 		token = getNextToken();
 		if (token.getValue() == "(") {
-			nodes.push_back(parseMethod(dataType, identifier));
+			auto node = make_shared<MethodDeclarationNode>();
+			*node = parseMethod(dataType, identifier);
+			nodes.push_back(node);
 		}
 		else {
 			resetReceivedToken();
-			VariableDeclarationNode node = parseVariableDeclaration(classAtr, dataType, identifier);
-			node.setGlobal(true);
+			auto node = make_shared<VariableDeclarationNode>();
+			*node = parseVariableDeclaration(classAtr, dataType, identifier);
+			node->setGlobal(true);
 			nodes.push_back(node);
 		}
 	}
@@ -143,7 +149,9 @@ MethodDeclarationNode SyntaxAnalyzer::parseMethod(string returnType, string iden
 	Token token = getNextToken();
 	check("{", token);
 
-	node.setBody(parseBody());
+	vector<shared_ptr<Node>> body;
+	parseBody(body);
+	node.setBody(body);
 
 	return node;
 }
@@ -215,9 +223,8 @@ map<string, string> SyntaxAnalyzer::parseMethodParams()
 	return params;
 }
 
-vector<Node> SyntaxAnalyzer::parseBody()
+void SyntaxAnalyzer::parseBody(vector<shared_ptr<Node>>& body)
 {
-	vector<Node> body;
 	map<string, string> bodyVars;
 	Token token = getNextToken();
 	while (token.getValue() != "}") {
@@ -227,14 +234,16 @@ vector<Node> SyntaxAnalyzer::parseBody()
 			string dataType = token.getValue();
 			token = getNextToken();
 			checkIdentifier(token);
-			VariableDeclarationNode node = parseVariableDeclaration(bodyVars, dataType, token.getValue());
-			node.setGlobal(false);
+			auto node = make_shared<VariableDeclarationNode>();
+			*node = parseVariableDeclaration(bodyVars, dataType, token.getValue());
+			node->setGlobal(false);
 			body.push_back(node);
 		}
 		//Const declaration
 		else if (tokenValue == "final") {
-			ConstDeclarationNode node = parseConstDeclaration(bodyVars);
-			node.setGlobal(false);
+			auto node = make_shared<ConstDeclarationNode>();
+			*node = parseConstDeclaration(bodyVars);
+			node->setGlobal(false);
 			body.push_back(node);
 		}
 		else if (token.getTokenType() == TokenTypesEnum::IDENTIFIER) {
@@ -242,32 +251,43 @@ vector<Node> SyntaxAnalyzer::parseBody()
 			token = getNextToken();
 			//Method invocation
 			if (token.getValue() == "(") {
-				body.push_back(parseMethodCall(name, bodyVars));
+				auto node = make_shared<MethodCall>();
+				*node = parseMethodCall(name, bodyVars);
+				body.push_back(node);
 			}
 			//var
 			else {
 				resetReceivedToken();
-				body.push_back(parseAssignment(name));
+				auto node = make_shared<AssignmentNode>();
+				*node = parseAssignment(name);
+				body.push_back(node);
 			}
 		}
 		else if (tokenValue == "for" || tokenValue == "while") {
-			body.push_back(parseCycleStatement(tokenValue));
+			auto node = make_shared<CycleStatementNode>();
+			*node = parseCycleStatement(tokenValue);
+			body.push_back(node);
 		}
 		else if (tokenValue == "if") {
-			body.push_back(parseIf());
+			auto node = make_shared<IfElseStatementNode>();
+			*node = parseIf();
+			body.push_back(node);
 		}
 
 		else if (tokenValue == "System.out.println") {
-			body.push_back(parseSout());
+			auto node = make_shared<SoutNode>();
+			*node = parseSout();
+			body.push_back(node);
 		}
 
 		else if (tokenValue == "return") {
-			body.push_back(parseReturnStatement());
+			auto node = make_shared<ReturnStatementNode>();
+			*node = parseReturnStatement();
+			body.push_back(node);
 		}
 
 		token = getNextToken();
 	}
-	return body;
 }
 
 MethodCall SyntaxAnalyzer::parseMethodCall(const string& methodName, const map<string, string>& methodVars)
@@ -457,13 +477,17 @@ IfElseStatementNode SyntaxAnalyzer::parseIf()
 	node.setCondition(parseWhileCondition()); //same logic fow now
 	Token token = getNextToken();
 	check("{", token);
-	node.setTrueBody(parseBody());
+	vector<shared_ptr<Node>> trueBody;
+	parseBody(trueBody);
+	node.setTrueBody(trueBody);
 	token = getNextToken();
 	if (token.getValue() == "else") {
 		node.setHasElseStatement(true);
 		token = getNextToken();
 		check("{", token);
-		node.setFalseBody(parseBody());
+		vector<shared_ptr<Node>> falseBody;
+		parseBody(falseBody);
+		node.setFalseBody(falseBody);
 	}
 	else resetReceivedToken();
 	return node;
@@ -485,7 +509,9 @@ CycleStatementNode SyntaxAnalyzer::parseCycleStatement(const string& cycleKeywor
 	Token token = getNextToken();
 	check("{", token);
 	//TODO handle break/continue statements
-	node.setBody(parseBody());
+	vector<shared_ptr<Node>> body;
+	parseBody(body);
+	node.setBody(body);
 	return node;
 }
 

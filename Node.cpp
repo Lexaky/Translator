@@ -1,6 +1,6 @@
 #include "Node.h"
 
-void MainClassNode::setBody(vector<Node> body)
+void MainClassNode::setBody(vector<shared_ptr<Node>> body)
 {
 	this->body = body;
 }
@@ -60,7 +60,7 @@ void MethodDeclarationNode::setParams(map<string, string> params)
 	this->params = params;
 }
 
-void MethodDeclarationNode::setBody(vector<Node>)
+void MethodDeclarationNode::setBody(vector<shared_ptr<Node>> body)
 {
 	this->body = body;
 }
@@ -100,7 +100,7 @@ void CycleStatementNode::setCondition(vector<Token> condition)
 	this->conditiion = conditiion;
 }
 
-void CycleStatementNode::setBody(vector<Node> body)
+void CycleStatementNode::setBody(vector<shared_ptr<Node>> body)
 {
 	this->body = body;
 }
@@ -110,7 +110,7 @@ void IfElseStatementNode::setCondition(vector<Token> condition)
 	this->condition = condition;
 }
 
-void IfElseStatementNode::setTrueBody(vector<Node> body)
+void IfElseStatementNode::setTrueBody(vector<shared_ptr<Node>> body)
 {
 	this->trueBody = body;
 }
@@ -120,7 +120,7 @@ void IfElseStatementNode::setHasElseStatement(bool flag)
 	this->hasElseStatement = flag;
 }
 
-void IfElseStatementNode::setFalseBody(vector<Node> body)
+void IfElseStatementNode::setFalseBody(vector<shared_ptr<Node>> body)
 {
 	this->falseBody = body;
 }

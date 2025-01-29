@@ -1,9 +1,21 @@
 public class Main {
-	public static int getPlus(int a) {
-		int b = a + 1;
-		return a;
+	public static int a = 5;
+	
+	static final String b = "boo";
+
+	private static int test(int a) {
+		if (a = 5) {
+			return a * 10;
+		} else {
+			return 0;	
+		}
 	}
+
 	public static void main (String[] args) {
+		int res = int(5);
+		while (a > 0) {
+			a = a - 1;
+		}
 		System.out.println("Hello world!");
 	}
 }
