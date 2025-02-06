@@ -350,22 +350,30 @@ AssignmentNode SyntaxAnalyzer::parseAssignment(const string& varName)
 	AssignmentNode node;
 	node.setVariableName(varName);
 	Token token = getNextToken();
-	check("=", token);
-	token = getNextToken();
 	vector<Token> expression;
-	while (token.getValue() != ";") {
-		if (token.getTokenType() != TokenTypesEnum::OPERATOR && token.getTokenType() != TokenTypesEnum::BOOLEAN
-			&& token.getTokenType() != TokenTypesEnum::CHAR && token.getTokenType() != TokenTypesEnum::FLOAT
-			&& token.getTokenType() != TokenTypesEnum::INT && token.getTokenType() != TokenTypesEnum::STRING
-			&& token.getTokenType() != TokenTypesEnum::IDENTIFIER && token.getValue() != "("
-			&& token.getValue() != ")") {
-			string message = "Value of unexpected type - " + token.getValue();
-			cout << message;
-			exit(1);
-		}
+	if (token.getValue() == "++" || token.getValue() == "--") {
 		expression.push_back(token);
 		token = getNextToken();
+		check(";", token);
 	}
+	else {
+		check("=", token);
+		token = getNextToken();
+		while (token.getValue() != ";") {
+			if (token.getTokenType() != TokenTypesEnum::OPERATOR && token.getTokenType() != TokenTypesEnum::BOOLEAN
+				&& token.getTokenType() != TokenTypesEnum::CHAR && token.getTokenType() != TokenTypesEnum::FLOAT
+				&& token.getTokenType() != TokenTypesEnum::INT && token.getTokenType() != TokenTypesEnum::STRING
+				&& token.getTokenType() != TokenTypesEnum::IDENTIFIER && token.getValue() != "("
+				&& token.getValue() != ")") {
+				string message = "Value of unexpected type - " + token.getValue();
+				cout << message;
+				exit(1);
+			}
+			expression.push_back(token);
+			token = getNextToken();
+		}
+	}
+	node.setRightSide(expression);
 	return node;
 }
 
@@ -506,6 +514,7 @@ CycleStatementNode SyntaxAnalyzer::parseCycleStatement(const string& cycleKeywor
 		node.setFor(false);
 		condition = parseWhileCondition();
 	}
+	node.setCondition(condition);
 	Token token = getNextToken();
 	check("{", token);
 	//TODO handle break/continue statements

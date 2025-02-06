@@ -17,7 +17,8 @@ const std::map<std::string, std::string> TokenTypes::KEY_WORDS{
     {"System.out.println", "SYSTEM.OUT.PRINTLN"},
     {"switch", "SWITCH"},
     {"case", "CASE"},
-    {"default", "DEFAULT"}
+    {"default", "DEFAULT"},
+    {"final", "FINAL"}
 };
 
 const std::map<std::string, std::string> TokenTypes::DATA_TYPES{

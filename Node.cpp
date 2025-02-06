@@ -97,7 +97,7 @@ void CycleStatementNode::setFor(bool isFor)
 
 void CycleStatementNode::setCondition(vector<Token> condition)
 {
-	this->conditiion = conditiion;
+	this->condition = condition;
 }
 
 void CycleStatementNode::setBody(vector<shared_ptr<Node>> body)

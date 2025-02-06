@@ -10,6 +10,7 @@
 #include "SyntaxAnalyzer.h"
 
 #include "TokenMapper.h"
+#include "SemanticAnalyzer.h"
 using namespace std;
 
 int main() {
@@ -34,15 +35,33 @@ int main() {
 	Lexer lexer;
 	Parser parser("javacode.txt");
 	std::vector<Token> variable = lexer.extractTokens(parser.getText());
+	cout << "Token vector:" << endl;
+	cout << "----------------" << endl;
 	for (int i = 0; i < variable.size(); i++) {
 		std::cout << i << ": Type: " << variable.at(i).getTokenType() << "    Value: " << variable.at(i).getValue() << std::endl;
 	}
-
+	cout << "----------------" << endl;
+	
+	//Syntax analyzer
 	SyntaxAnalyzer syntaxAnalyzer(variable);
 	MainClassNode ast = syntaxAnalyzer.buildAst();
-
-	//Semantic analizer here
-
+	cout << "AST tree:" << endl;
+	cout << "----------------" << endl;
+	ast.print();
+	cout << "----------------" << endl;
+	
+	//Semantic analyzer here
+	SemanticAnalyzer sa(variable);
+	cout << "Semantic Analyzer prints:" << endl;
+	cout << "----------------" << endl;
+	sa.printAllVariables();
+	cout << "----------------" << endl;
+	sa.printAllExpressions(); 
+	cout << "----------------" << endl;
+	sa.doSemanticAnalysis();
+	
+	cout << "Pascal generated:" << endl;
+	cout << "----------------" << endl;
 	TokenMapper *tm = new TokenMapper(variable);
 	tm->printPascalCode();
 	return 0;

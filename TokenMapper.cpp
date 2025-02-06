@@ -39,40 +39,40 @@ void TokenMapper::reconstructPascalTokens() {
     std::vector<std::string> functionType;
     std::vector<std::string> methodName;
     std::vector<std::string> varGlobalStartValue;
-    bool isType = false;         // Флаг для типа данных
-    std::string currentType;     // Текущий тип данных
-    std::string currentArea = "GLOBAL"; // Текущая область видимости
-    std::string currentFunctionOrMethod; // Текущая функция/метод
+    bool isType = false;         // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    std::string currentType;     // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    std::string currentArea = "GLOBAL"; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    std::string currentFunctionOrMethod; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅ
 
     for (size_t i = 0; i < sourceTokens.size(); ++i) {
         const Token& token = sourceTokens[i];
 
-        // Если токен — тип данных или void
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ void
         if (typeMapping.find(token.getValue()) != typeMapping.end()) {
             isType = true;
             currentType = typeMapping[token.getValue()];
         }
-        // Если токен — идентификатор и мы обрабатываем переменную
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         else if (isType && token.getTokenType() == IDENTIFIER) {
             const std::string& identifier = token.getValue();
 
-            // Проверяем, является ли следующий токен "(" — это функция или метод
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ "(" пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             if (i + 1 < sourceTokens.size() && sourceTokens[i + 1].getValue() == "(") {
                 if (currentType == "void") {
-                    // Это процедура
+                    // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                     methodName.push_back(identifier);
                     currentArea = identifier;
                 }
                 else {
-                    // Это функция
+                    // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                     functionName.push_back(identifier);
                     functionType.push_back(currentType);
                     currentArea = identifier;
                 }
                 currentFunctionOrMethod = identifier;
-                ++i; // Пропускаем "("
+                ++i; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "("
 
-                // Обрабатываем параметры функции или метода
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 while (i + 1 < sourceTokens.size() && sourceTokens[++i].getValue() != ")") {
                     if (typeMapping.find(sourceTokens[i].getValue()) != typeMapping.end()) {
                         std::string paramType = typeMapping[sourceTokens[i].getValue()];
@@ -85,7 +85,7 @@ void TokenMapper::reconstructPascalTokens() {
                 }
             }
             else {
-                // Это обычная переменная
+                // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 varNames.push_back(identifier);
                 varTypes.push_back(currentType + "");
                 area.push_back(currentArea);
@@ -97,33 +97,33 @@ void TokenMapper::reconstructPascalTokens() {
                 }
             }
 
-            isType = false; // Завершаем обработку текущего типа
+            isType = false; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         }
-        // Если токен — "{" — начинаем блок (сбрасываем область)
-        else if (token.getValue() == "{") {
-            // Продолжаем текущую область видимости
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ "{" пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+        else if (token.getValue() == "{" && token.getTokenType() == SPECIAL_SYMBOL) {
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         }
-        // Если токен — "}" — заканчиваем блок
-        else if (token.getValue() == "}") {
-            currentArea = "GLOBAL"; // Возвращаемся к глобальной области
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ "}" пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+        else if (token.getValue() == "}" && token.getTokenType() == SPECIAL_SYMBOL) {
+            currentArea = "GLOBAL"; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             currentFunctionOrMethod.clear();
         }
 
-        // Обновляем текущую область видимости, если находимся внутри функции или метода
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (!currentFunctionOrMethod.empty()) {
             currentArea = currentFunctionOrMethod;
         }
     }
 
-    // Извлёк все названия переменных и их типы данных уже в Pascal-евском виде
-    // Извлёк названия функций и их типов, методов. Для переменных видно, к какому методу/функции они принадлежат
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ Pascal-пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     std::cout << "Program Main;\n";
     for (int i = 0, j = 0; i < varNames.size(); i++) {
         if (area.at(i) == "GLOBAL" || area.at(i) == "main")
         {
             std::cout << "var " << varNames.at(i) + " : " + varTypes.at(i);
 
-            if (varGlobalStartValue.size() > 0 && varGlobalStartValue.at(j) != "_hasNotInit__" && area.at(i) == "GLOBAL") {
+            if (varGlobalStartValue.size() > 0 && j < varGlobalStartValue.size() && varGlobalStartValue.at(j) != "_hasNotInit__" && area.at(i) == "GLOBAL") {
                 if (varTypes.at(i) == "string" || varTypes.at(i) == "char")
                 {
                     varGlobalStartValue.at(j) = "\'" + varGlobalStartValue.at(j) + "\'";
@@ -141,27 +141,27 @@ void TokenMapper::reconstructPascalTokens() {
     varTypesInFunction.reserve(varTypes.size());
     std::vector<Token> bodyFunction;
     bodyFunction.reserve(sourceTokens.size());
-    // Далее генерация функций пользователя:
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
     for (int i = 0; i < functionName.size(); i++) {
         if (functionName.at(i) == "main")
             continue;
-
         for (int j = 0; j < sourceTokens.size(); j++) {
             if (sourceTokens.at(j).getValue() == functionName.at(i)) {
-                while (sourceTokens.at(j).getValue() != "{")
+                while (sourceTokens.at(j).getValue() != "{" || sourceTokens.at(j).getTokenType() != SPECIAL_SYMBOL)
                     j++;
                 j++;
-                int nestedLevel = 0;
-                while (nestedLevel != 0 || sourceTokens.at(j).getValue() != "}") {
+                int nestedLevel = 1;
+                while (nestedLevel != 0 || sourceTokens.at(j).getValue() != "}" || sourceTokens.at(j).getTokenType() != SPECIAL_SYMBOL) {
                     bodyFunction.push_back(sourceTokens.at(j));
-                    if (sourceTokens.at(j).getValue() == "{") {
+                    if (sourceTokens.at(j).getValue() == "{" && sourceTokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
                         nestedLevel++;
                     }
                     j++;
-                    if (sourceTokens.at(j).getValue() == "}" && nestedLevel > 0) {
+                    if (sourceTokens.at(j).getValue() == "}" && nestedLevel > 0 && sourceTokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
                         nestedLevel--;
                     }
                 }
+                //bodyFunction.push_back(sourceTokens.at(j));
 
                 for (int k = 0; k < area.size(); k++) {
                     if (area.at(k) == functionName.at(i)) {
@@ -173,15 +173,16 @@ void TokenMapper::reconstructPascalTokens() {
                 bodyFunction.clear();
                 varNamesInFunction.clear();
                 varTypesInFunction.clear();
+                break;
             }
-
         }
     }
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     bodyFunction.clear();
     varNamesInFunction.clear();
     varTypesInFunction.clear();
     bodyFunction.reserve(sourceTokens.size());
-    // Генерация методов пользователя:
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
     for (int i = 0; i < methodName.size(); i++) {
         for (int j = 0; j < sourceTokens.size(); j++) {
             if (sourceTokens.at(j).getValue() == methodName.at(i)) {
@@ -189,12 +190,12 @@ void TokenMapper::reconstructPascalTokens() {
                     j++;
                 j++;
                 int nestedLevel = 0;
-                while (nestedLevel != 0 || sourceTokens.at(j).getValue() != "}") {
-                    if (j < sourceTokens.size() && sourceTokens.at(j).getValue() == "}" && nestedLevel > 0) {
+                while (nestedLevel != 0 || sourceTokens.at(j).getValue() != "}" || sourceTokens.at(j).getTokenType() != SPECIAL_SYMBOL) {
+                    if (j < sourceTokens.size() && sourceTokens.at(j).getValue() == "}" && sourceTokens.at(j).getTokenType() == SPECIAL_SYMBOL && nestedLevel > 0) {
                         nestedLevel--;
                     }
                     
-                    if (j < sourceTokens.size() && sourceTokens.at(j).getValue() == "{") {
+                    if (j < sourceTokens.size() && sourceTokens.at(j).getValue() == "{" && sourceTokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
                         nestedLevel++;
                     }
                     if (j < sourceTokens.size())
@@ -225,7 +226,7 @@ void TokenMapper::generateFunction(std::string functionName, std::string functio
         if (varTypes.at(i).at(varTypes.at(i).size() - 1) == '_')
         {
             std::cout << varNames.at(i) << " : " << varTypes.at(i).substr(0, varTypes.at(i).size() - 1);
-            if (i + 1 != varNames.size())
+            if (i + 1 > varNames.size())
                 std::cout << "; ";
         }
     }
@@ -240,7 +241,6 @@ void TokenMapper::generateFunction(std::string functionName, std::string functio
     std::vector <Token> newTokens;
     newTokens.reserve(tokens.size() + 1);
     for (int i = 0; i < tokens.size(); i++) {
-        //Что-то придумать с токеном "return", он должен заменяться на [functionName] := 
         if (tokens.at(i).getValue() == "return" && tokens.at(i).getTokenType() == KEY_WORD) {
             Token returnToken(functionName, KEY_WORD);
             newTokens.push_back(returnToken);
@@ -251,8 +251,11 @@ void TokenMapper::generateFunction(std::string functionName, std::string functio
             newTokens.push_back(tokens.at(i));
         }
     }
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ return'пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    // newTokens пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ { пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ }
+    // newTokens пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     globalGenerator(newTokens);
-    
     std::cout << "end;\n";
 }
 
@@ -281,31 +284,33 @@ void TokenMapper::generateMethods(std::string methodName, std::vector<std::strin
         }
     }
     std::cout << "begin\n";
-
     globalGenerator(tokens);
-
     std::cout << "end;\n";
 }
 
 
 void TokenMapper::globalGenerator(std::vector<Token> tokens) {
-    //tokens содержит внутренние конструкции методов (включая метод main)
+    //tokens пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ main)
     for (int i = 0; i < tokens.size(); i++) {
-        if (tokens.at(i).getValue() == "if") {
+        if (tokens.at(i).getValue() == "if" && tokens.at(i).getTokenType() == KEY_WORD) {
             std::vector<Token> ifTokens;
             ifTokens.reserve(tokens.size());
             int j = i, nestedLevel = 0;
-            while (tokens.at(j).getValue() != "}" || nestedLevel != 0) {
-                ifTokens.push_back(tokens.at(j));
+            while (j < tokens.size() && tokens.at(j).getValue() != "}" || tokens.at(j).getTokenType() != SPECIAL_SYMBOL || nestedLevel != 0) {
+                if (j < tokens.size())
+                    ifTokens.push_back(tokens.at(j));
                 j++;
-                if (tokens.at(j).getValue() == "}" && nestedLevel > 0) {
+                if (j < tokens.size() && tokens.at(j).getValue() == "}" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL && nestedLevel > 0) {
                     nestedLevel--;
                 }
-                if (tokens.at(j).getValue() == "{") {
+                if (j < tokens.size() && tokens.at(j).getValue() == "{" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
                     nestedLevel++;
                 }
             }
-            ifTokens.push_back(tokens.at(j));
+            if (j < tokens.size())
+                ifTokens.push_back(tokens.at(j));
+            //ifTokens пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ if () { ... }
+            //else пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
             ifGenerator(ifTokens);
             i = j + 1;
             if (i < tokens.size() && tokens.at(i).getValue() != "else") {
@@ -318,27 +323,29 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
             }
             std::cout << "\n";
             ifTokens.clear();
-            if (tokens.at(i).getValue() == "else") {
+            if (i < tokens.size() && tokens.at(i).getValue() == "else") {
                 ifTokens.reserve(tokens.size());
                 int j = i, nestedLevel = 0;
-                while (tokens.at(j).getValue() != "}" || nestedLevel != 0) {
-                    ifTokens.push_back(tokens.at(j));
+                while (j < tokens.size() && tokens.at(j).getValue() != "}" || tokens.at(j).getTokenType() != SPECIAL_SYMBOL || nestedLevel != 0) {
+                    if (j < tokens.size())
+                        ifTokens.push_back(tokens.at(j));
                     j++;
-                    if (tokens.at(j).getValue() == "}" && nestedLevel > 0) {
+                    if (j < tokens.size() && tokens.at(j).getValue() == "}" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL && nestedLevel > 0) {
                         nestedLevel--;
                     }
-                    if (tokens.at(j).getValue() == "{") {
+                    if (j < tokens.size() && tokens.at(j).getValue() == "{" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
                         nestedLevel++;
                     }
                 }
-                ifTokens.push_back(tokens.at(j));
+                if (j < tokens.size())
+                    ifTokens.push_back(tokens.at(j));
                 elseGenerator(ifTokens);
-                i = j + 1;
+                i = j;
                 std::cout << "\n";
                 continue;
             }
         }
-        else if (tokens.at(i).getValue() == "while") {
+        else if (tokens.at(i).getValue() == "while" && tokens.at(i).getTokenType() == KEY_WORD) {
                 std::vector<Token> ifTokens;
                 ifTokens.reserve(tokens.size());
                 int j = i, nestedLevel = 0;
@@ -358,7 +365,7 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
                 std::cout << "\n";
                 continue;
         }
-        else if (tokens.at(i).getValue() == "for") {
+        else if (tokens.at(i).getValue() == "for" && tokens.at(i).getTokenType() == KEY_WORD) {
             std::vector<Token> forTokens;
             forTokens.reserve(tokens.size());
             int j = i, nestedLevel = 0;
@@ -405,35 +412,70 @@ void TokenMapper::globalGenerator(std::vector<Token> tokens) {
 void TokenMapper::ifGenerator(std::vector<Token> tokens) {
     std::cout << "if ";
     int i = 0;
-    if (tokens.at(i).getValue() == "if")
+    if (tokens.at(i).getValue() == "if" && tokens.at(i).getTokenType() == KEY_WORD)
         i++;
     std::vector<Token> ifExpression;
     ifExpression.reserve(sourceTokens.size());
     
+    //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ ifExpression пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ '(' пїЅ ')'
     if (tokens.at(i).getValue() == "(")
         i++;
-    while (tokens.at(i).getValue() != ")") {
+    int nestedLevel = 1;
+    while (nestedLevel != 0) {
+        if (tokens.at(i).getValue() == "(" && tokens.at(i).getTokenType() == SPECIAL_SYMBOL) {
+            nestedLevel++;
+        }
+        if (tokens.at(i).getValue() == ")" && tokens.at(i).getTokenType() == SPECIAL_SYMBOL) {
+            nestedLevel--;
+            if (nestedLevel == 0)
+            {
+                break;
+            }
+        }
         ifExpression.push_back(tokens.at(i));
         i++;
     }
-    globalGenerator(ifExpression);
+    //ifExpression пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    ifExpressionGenerator(ifExpression);
     std::cout << "then begin\n";
     std::vector<Token> insideIf;
     insideIf.reserve(sourceTokens.size());
-    int nestedLevel = 0;
     i += 2;
-    while (nestedLevel != 0 || tokens.at(i).getValue() != "}") {
-        if (tokens.at(i).getValue() == "}") {
-            nestedLevel--;
-        }
-        if (tokens.at(i).getValue() == "{") {
-            nestedLevel++;
-        }
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ if пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ i
+    int j = tokens.size() - 2; // j пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ if (пїЅпїЅ }, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ insideIf пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ if пїЅпїЅ i пїЅпїЅ j пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    for (i; i <= j; i++) {
         insideIf.push_back(tokens.at(i));
-        i++;
     }
     globalGenerator(insideIf);
     std::cout << "end";
+}
+
+void TokenMapper::ifExpressionGenerator(std::vector<Token> tokens) {
+    std::vector<Token> subExpression;
+    subExpression.reserve(tokens.size());
+    for (int i = 0; i < tokens.size(); i++) {
+        if ((tokens.at(i).getValue() == "&&" || tokens.at(i).getValue() == "||") 
+            && tokens.at(i).getTokenType() == OPERATOR) {
+            std::cout << "(";
+            globalGenerator(subExpression);
+            subExpression.clear();
+            subExpression.reserve(tokens.size());
+            std::cout << ")";
+            subExpression.push_back(tokens.at(i));
+            globalGenerator(subExpression);
+            subExpression.clear();
+            subExpression.reserve(tokens.size());
+        }
+        else {
+            subExpression.push_back(tokens.at(i));
+        }
+    }
+    std::cout << "(";
+    globalGenerator(subExpression);
+    std::cout << ")";
 }
 
 void TokenMapper::whileGenerator(std::vector<Token> tokens) {
@@ -444,24 +486,24 @@ void TokenMapper::whileGenerator(std::vector<Token> tokens) {
     std::vector<Token> ifExpression;
     ifExpression.reserve(sourceTokens.size());
 
-    if (tokens.at(i).getValue() == "(")
+    if (tokens.at(i).getValue() == "(" && tokens.at(i).getTokenType() == SPECIAL_SYMBOL)
         i++;
-    while (tokens.at(i).getValue() != ")") {
+    while (tokens.at(i).getValue() != ")" || tokens.at(i).getTokenType() != SPECIAL_SYMBOL) {
         ifExpression.push_back(tokens.at(i));
         i++;
     }
     i++;
-    globalGenerator(ifExpression);
+    ifExpressionGenerator(ifExpression);
     std::cout << "do begin\n";
     std::vector<Token> insideIf;
     insideIf.reserve(sourceTokens.size());
     int nestedLevel = 0;
     i++;
-    while (nestedLevel != 0 || tokens.at(i).getValue() != "}") {
-        if (tokens.at(i).getValue() == "}" && nestedLevel > 0) {
+    while (nestedLevel != 0 || tokens.at(i).getValue() != "}" || tokens.at(i).getTokenType() != SPECIAL_SYMBOL) {
+        if (tokens.at(i).getValue() == "}" && nestedLevel > 0 && tokens.at(i).getTokenType() == SPECIAL_SYMBOL) {
             nestedLevel--;
         }
-        if (tokens.at(i).getValue() == "{") {
+        if (tokens.at(i).getValue() == "{" && tokens.at(i).getTokenType() == SPECIAL_SYMBOL) {
             nestedLevel++;
         }
         insideIf.push_back(tokens.at(i));
@@ -472,27 +514,20 @@ void TokenMapper::whileGenerator(std::vector<Token> tokens) {
 }
 
 void TokenMapper::elseGenerator(std::vector<Token> tokens) {
+    //tokens пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ else { ... }
     std::cout << "else begin\n";
     int i = 2;
     std::vector<Token> insideElse;
     insideElse.reserve(sourceTokens.size());
-    int nestedLevel = 0;
-    while (nestedLevel != 0 || tokens.at(i).getValue() != "}") {
-        if (tokens.at(i).getValue() == "}" && nestedLevel > 0) {
-            nestedLevel--;
-        }
-        if (tokens.at(i).getValue() == "{") {
-            nestedLevel++;
-        }
+    int j = tokens.size() - 2;
+    for (i; i <= j; i++) {
         insideElse.push_back(tokens.at(i));
-        i++;
     }
     globalGenerator(insideElse);
     std::cout << "end;\n";
 }
 
 void TokenMapper::forGenerator(std::vector<Token> tokens) {
-    std::cout << "while ";
     int i = 1;
     std::vector <Token> forInit;
     forInit.reserve(tokens.size());
@@ -512,6 +547,10 @@ void TokenMapper::forGenerator(std::vector<Token> tokens) {
         firstPart.push_back(forInit.at(j));
         j++;
     }
+    Token tk(";", SPECIAL_SYMBOL);
+    firstPart.push_back(tk);
+    globalGenerator(firstPart);
+    std::cout << "while ";
     j++;
     while (forInit.at(j).getValue() != ";") {
         secondPart.push_back(forInit.at(j));
@@ -528,31 +567,38 @@ void TokenMapper::forGenerator(std::vector<Token> tokens) {
     std::vector<Token> insideFor;
     insideFor.reserve(tokens.size());
     
-    globalGenerator(secondPart);
+    ifExpressionGenerator(secondPart);
     
     int nestedLevel = 1;
     std::cout << "do begin\n";
     if (tokens.at(j).getValue() == ")")
         j++;
-    if (tokens.at(j).getValue() == "{")
+    if (tokens.at(j).getValue() == "{" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL)
         j++;
     while ((j < tokens.size() && tokens.at(j).getValue() != "}") || nestedLevel != 0) {
-        if (tokens.at(j).getValue() == "{") {
+        if (tokens.at(j).getValue() == "{" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL) {
             nestedLevel++;
         }
-        if (tokens.at(j).getValue() == "}" && nestedLevel - 1 == 0) {
+        if (tokens.at(j).getValue() == "}" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL && nestedLevel - 1 == 0) {
             nestedLevel--;
             insideFor.push_back(tokens.at(j));
             break;
         }
-        else if (tokens.at(j).getValue() == "}" && nestedLevel > 0) {
+        else if (tokens.at(j).getValue() == "}" && tokens.at(j).getTokenType() == SPECIAL_SYMBOL && nestedLevel > 0) {
             nestedLevel--;
         }
         insideFor.push_back(tokens.at(j));
         j++;
     }
-
-    globalGenerator(insideFor);
+    std::vector<Token> iF; iF.reserve(insideFor.size());
+    if (insideFor.at(insideFor.size() - 1).getValue() == "}" &&
+        insideFor.at(insideFor.size() - 1).getTokenType() == SPECIAL_SYMBOL) {
+        
+        for (int k = 0; k < insideFor.size() - 1; k++) {
+            iF.push_back(insideFor.at(k));
+        }
+    }
+    globalGenerator(iF);
     //forInside here
     std::cout << "\n";
     globalGenerator(thirdPart);

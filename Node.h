@@ -9,7 +9,10 @@
 
 using namespace std;
 
-class Node {};
+class Node {
+public:
+	virtual void print() const {};
+};
 
 class MainClassNode : public Node {
 public:
@@ -17,6 +20,13 @@ public:
 	void setBody(vector<shared_ptr<Node>> body);
 	vector<shared_ptr<Node>> getBody() {
 		return body;
+	}
+	void print() const override {
+		cout << "Class body: [" << endl;
+		for (size_t i = 0; i < body.size(); ++i) {
+			body[i]->print();
+		}
+		cout << "]" << endl;
 	}
 private:
 	vector<shared_ptr<Node>> body;
@@ -45,6 +55,22 @@ public:
 	vector<shared_ptr<Node>> getBody() {
 		return body;
 	}
+	void print() const override {
+		cout << "Method: {" << endl;
+		cout << "returnType: " << returnType << ",\n";
+		cout << "name: " << name << ",\n";
+		cout << "params: [";
+		for (auto it = params.begin(); it != params.end(); ++it) {
+			cout << it->first << "-" << it->second << ",\n";
+		}
+		cout << "],\n";
+		cout << "body: [" << endl;
+		for (size_t i = 0; i < body.size(); ++i) {
+			body[i]->print();
+		}
+		cout << "]\n";
+		cout << "}," << endl;
+	}
 private:
 	bool isMain;
 	string returnType;
@@ -58,6 +84,15 @@ public:
 	SoutNode() {};
 	void setParams(vector<Token> params);
 	vector<Token> getParams();
+	void print() const override {
+		cout << "Sout: {" << endl;
+		cout << "params: [\n";
+		for (size_t i = 0; i < params.size(); ++i) {
+			cout << "'" << params.at(i).getValue() << "', ";
+		}
+		cout << "\n]\n";
+		cout << "}," << endl;
+	}
 private:
 	vector<Token> params;
 };
@@ -99,6 +134,23 @@ public:
 	}
 	vector<Token> getTokens() {
 		return initializer;
+	}
+	void print() const override {
+		cout << "Const Declaration: {" << endl;
+		cout << "type: " << type << ",\n";
+		cout << "name: " << name << ",\n";
+		cout << "isGlobal: " << isGlobal << ",\n";
+		if (initializer.empty()) {
+			cout << "value: " << value.getValue() << ",\n";
+		}
+		else {
+			cout << "value: [" << endl;
+			for (size_t i = 0; i < initializer.size(); ++i) {
+				cout << initializer[i].getValue() << ", ";
+			}
+			cout << "\n]\n";
+		}
+		cout << "}," << endl;
 	}
 private:
 	string type;
@@ -161,11 +213,25 @@ public:
 		return body;
 	}
 	vector <Token> getTokens() {
-		return conditiion;
+		return condition;
+	}
+	void print() const override {
+		(isFor) ? cout << "For: {\n" : cout << "While: {\n";
+		cout << "condition: [\n";
+		for (size_t i = 0; i < condition.size(); ++i) {
+			cout << condition.at(i).getValue() << ", ";
+		}
+		cout << "\n],\n";
+		cout << "body: [" << endl;
+		for (size_t i = 0; i < body.size(); ++i) {
+			body[i]->print();
+		}
+		cout << "\n]\n";
+		cout << "}," << endl;
 	}
 private:
 	bool isFor;		//otherwise while
-	vector<Token> conditiion;
+	vector<Token> condition;
 	vector<shared_ptr<Node>> body;
 };
 

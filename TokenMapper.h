@@ -57,7 +57,7 @@ private:
         {"void", "procedure"},
         {"volatile", "volatile"},
         {"while", "while"},
-        // Символы и конструкции
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         {"{", "begin"},
         {"}", "end"},
         {";", ";"},
@@ -72,6 +72,7 @@ private:
         {"*/", "**}"},
         {"/*", "{*"},
         {"*/", "*}"},
+        {"%", "mod"},
         {"System.out.println", "writeln"},
         {"System.out.print", "write"},
         {"import", "uses"},
@@ -99,8 +100,8 @@ private:
     void ifGenerator(std::vector<Token> tokens);
     void whileGenerator(std::vector<Token> tokens);
     void elseGenerator(std::vector<Token> tokens);
-    void doWhileGenerator(std::vector<Token> tokens);
     void forGenerator(std::vector<Token> tokens);
+    void ifExpressionGenerator(std::vector<Token> tokens);
 public:
 	TokenMapper(std::vector<Token> tokens);
 	std::vector<std::string> getPascalTokens();
