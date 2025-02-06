@@ -40,23 +40,16 @@ void SemanticAnalyzer::fillAllVariables() {
         // if token - identifier and we proccess variable
         else if (isType && token.getTokenType() == IDENTIFIER) {
             const std::string& identifier = token.getValue();
-
+            bool isDeclared = false;
             // check, is next token "(" - func or void
             if (i + 1 < tokens.size() && tokens[i + 1].getValue() == "(") {
-    //            if (currentType == "void") {
-    //                // is void
-    //                objVIP.varName = identifier;
-    //                objVIP.area = identifier;
-    //            }
-    //            else {
-                    // is func
-                    objVIP.varName = identifier;
-                    objVIP.varType = currentType;
-                    objVIP.area = identifier; // added myself
-                    objVIP.inParameter = false; // added myself
-                    allVariables.push_back(objVIP); // added myself
-                    currentArea = identifier;
-     //           }
+                objVIP.varName = identifier;
+                objVIP.varType = currentType;
+                objVIP.area = identifier; // added myself
+                objVIP.inParameter = false; // added myself
+                allVariables.push_back(objVIP); // added myself
+                currentArea = identifier;
+
                 currentFunctionOrMethod = identifier;
                 ++i; // skip "("
 
@@ -69,7 +62,18 @@ void SemanticAnalyzer::fillAllVariables() {
                             objVIP.varType = paramType;
                             objVIP.inParameter = true;
                             objVIP.area = currentFunctionOrMethod;
-                            allVariables.push_back(objVIP);
+                            for (const auto& var : allVariables) {
+                                if (var.varName == objVIP.varName && var.area == objVIP.area) {
+                                    isDeclared = true;
+                                    break;
+                                }
+                            }
+                            if (!isDeclared) {
+                                allVariables.push_back(objVIP);
+                            }
+                            else {
+                                std::cout << "Error: Variable '" << objVIP.varName << "' is already declared in '" << objVIP.area << "'\n";
+                            }
                         }
                     }
                 }
@@ -80,7 +84,18 @@ void SemanticAnalyzer::fillAllVariables() {
                 objVIP.varType = currentType;
                 objVIP.area = currentArea;
                 objVIP.inParameter = false;
-                allVariables.push_back(objVIP);
+                for (const auto& var : allVariables) {
+                    if (var.varName == objVIP.varName && var.area == objVIP.area) {
+                        isDeclared = true;
+                        break;
+                    }
+                }
+                if (!isDeclared) {
+                    allVariables.push_back(objVIP);
+                }
+                else {
+                    std::cout << "Error: Variable '" << objVIP.varName << "' is already declared in '" << objVIP.area << "'\n";
+                }
             }
 
             isType = false; // end processing of current type
@@ -209,7 +224,7 @@ void SemanticAnalyzer::getAllExpressionsByVariablesAndReturn() {
                 tokens.at(forwardMovementer).getTokenType() != SPECIAL_SYMBOL)) {
                 forwardMovementer++;
             }
-
+            
             // Collect tokens for the current expression
             if (backMovementer == 0) {
                 for (int j = backMovementer; j < forwardMovementer; j++) {
@@ -250,15 +265,18 @@ void SemanticAnalyzer::printAllExpressions() {
 
 void SemanticAnalyzer::doSemanticAnalysis() {
     checkVariableDeclaration();
+    checkDivisionByZero();
 }
 
 void SemanticAnalyzer::checkVariableDeclaration() {
     for (const auto& expr : eip) {
         for (const auto& token : expr.expr) {
+            if (token.getTokenType() == ACCESS_MODIFIER &&
+                (token.getValue() == "public" || token.getValue() == "private")) { break; }
             if (token.getTokenType() == IDENTIFIER) {
                 bool isDeclared = false;
                 for (const auto& var : allVariables) {
-                    if (var.varName == token.getValue() && (var.area == expr.area || var.area == token.getValue())) {
+                    if (var.varName == token.getValue() && (var.area == expr.area || var.area == token.getValue() || var.area == "GLOBAL")) {
                         isDeclared = true;
                         break;
                     }
@@ -273,57 +291,127 @@ void SemanticAnalyzer::checkVariableDeclaration() {
 
 void SemanticAnalyzer::checkTypeCompatibility() {
     for (const auto& expr : eip) {
-        std::string expectedType;
-        for (size_t i = 0; i < expr.expr.size(); ++i) {
-            const auto& token = expr.expr[i];
-            if (token.getTokenType() == IDENTIFIER) {
-                auto it = std::find_if(
-                    allVariables.begin(),
-                    allVariables.end(),
-                    [&token](const varsInProgram& var) {
-                        return var.varName == token.getValue();
+        // check return expressions
+        if (expr.expr.size() > 0 && expr.expr[0].getValue() == "return") {
+            std::string expectedType;
+            for (const auto& var : allVariables) {
+                if (var.varName == expr.area && var.varType != "void") {
+                    expectedType = var.varType;
+                    break;
+                }
+            }
+
+            if (!expectedType.empty()) {
+                // Простая проверка: предполагаем, что возвращаемое значение - это последний токен в выражении
+                const Token& returnToken = expr.expr.back();
+                if (returnToken.getTokenType() == IDENTIFIER) {
+                    for (const auto& var : allVariables) {
+                        if (var.varName == returnToken.getValue() && var.varType != expectedType) {
+                            std::cout << "Error: Return type mismatch in function '" << expr.area << "'. Expected '" << expectedType << "', but got '" << var.varType << "'\n";
+                        }
                     }
-                );
-                if (it != allVariables.end()) {
-                    if (expectedType.empty()) {
-                        expectedType = it->varType;
-                    }
-                    else if (expectedType != it->varType) {
-                        std::cout << "Error: Type mismatch for variable '" << token.getValue() << "'." << std::endl;
+                }
+                else if (returnToken.getTokenType() == INT || returnToken.getTokenType() == FLOAT) {
+                    if ((expectedType != "integer" && returnToken.getTokenType() == INT) ||
+                        (expectedType != "float" && returnToken.getTokenType() == FLOAT)) {
+                        std::cout << "Error: Return type mismatch in function '" << expr.area << "'. Expected '" << expectedType << "', but got '" << (returnToken.getTokenType() == INT ? "integer" : "float") << "'\n";
                     }
                 }
             }
-            else if (token.getTokenType() == OPERATOR) {
-                if (token.getValue() == "+" || token.getValue() == "-" || token.getValue() == "*" || token.getValue() == "/") {
-                    if (i > 0 && i < expr.expr.size() - 1) {
-                        const auto& left = expr.expr[i - 1];
-                        const auto& right = expr.expr[i + 1];
-                        std::string leftType, rightType;
+            else {
+                std::cout << "Error: Encountered return statement in void method" << "\n";
+            }
+        }
 
-                        auto findType = [&](const Token& tok) -> std::string {
-                            if (tok.getTokenType() == IDENTIFIER) {
-                                auto varIt = std::find_if(
-                                    allVariables.begin(),
-                                    allVariables.end(),
-                                    [&tok](const varsInProgram& var) {
-                                        return var.varName == tok.getValue();
-                                    }
-                                );
-                                if (varIt != allVariables.end()) {
-                                    return varIt->varType;
-                                }
+        // Проверка присваиваний
+        for (size_t i = 0; i < expr.expr.size(); ++i) {
+            if (expr.expr[i].getValue() == "=") {
+                if (i > 0 && i + 1 < expr.expr.size()) {
+                    const Token& leftToken = expr.expr[i - 1];  // Левая часть присваивания
+                    const Token& rightToken = expr.expr[i + 1]; // Правая часть присваивания
+
+                    std::string leftType, rightType;
+
+                    // Определяем тип левой части
+                    if (leftToken.getTokenType() == IDENTIFIER) {
+                        for (const auto& var : allVariables) {
+                            if (var.varName == leftToken.getValue() && var.area == expr.area) {
+                                leftType = var.varType;
+                                break;
                             }
-                            return tok.getTokenType() == INT ? "integer" :
-                                tok.getTokenType() == FLOAT ? "real" : "";
-                            };
-
-                        leftType = findType(left);
-                        rightType = findType(right);
-
-                        if (!leftType.empty() && !rightType.empty() && leftType != rightType) {
-                            std::cout << "Error: Type mismatch in expression involving '"
-                                << left.getValue() << "' and '" << right.getValue() << "'." << std::endl;
                         }
+                    }
+
+                    // Определяем тип правой части
+                    if (rightToken.getTokenType() == IDENTIFIER) {
+                        for (const auto& var : allVariables) {
+                            if (var.varName == rightToken.getValue() && var.area == expr.area) {
+                                rightType = var.varType;
+                                break;
+                            }
+                        }
+                    }
+                    else if (rightToken.getTokenType() == INT) {
+                        rightType = "integer";
+                    }
+                    else if (rightToken.getTokenType() == FLOAT) {
+                        rightType = "real";
+                    }
+
+                    // Сравниваем типы
+                    if (!leftType.empty() && !rightType.empty() && leftType != rightType) {
+                        std::cout << "Error: Type mismatch in assignment in area '" << expr.area << "'. Expected '" << leftType << "', but got '" << rightType << "'\n";
+                    }
+                }
+            }
+        }
+
+        // Проверка арифметических операций
+        for (size_t i = 0; i < expr.expr.size(); ++i) {
+            if (expr.expr[i].getTokenType() == OPERATOR &&
+                (expr.expr[i].getValue() == "+" || expr.expr[i].getValue() == "-" ||
+                expr.expr[i].getValue() == "*" || expr.expr[i].getValue() == "/")) {
+                if (i > 0 && i + 1 < expr.expr.size()) {
+                    const Token& leftToken = expr.expr[i - 1];  // Левый операнд
+                    const Token& rightToken = expr.expr[i + 1]; // Правый операнд
+
+                    std::string leftType, rightType;
+
+                    // Определяем тип левого операнда
+                    if (leftToken.getTokenType() == IDENTIFIER) {
+                        for (const auto& var : allVariables) {
+                            if (var.varName == leftToken.getValue() && var.area == expr.area) {
+                                leftType = var.varType;
+                                break;
+                            }
+                        }
+                    }
+                    else if (leftToken.getTokenType() == INT) {
+                        leftType = "integer";
+                    }
+                    else if (leftToken.getTokenType() == FLOAT) {
+                        leftType = "real";
+                    }
+
+                    // Определяем тип правого операнда
+                    if (rightToken.getTokenType() == IDENTIFIER) {
+                        for (const auto& var : allVariables) {
+                            if (var.varName == rightToken.getValue() && var.area == expr.area) {
+                                rightType = var.varType;
+                                break;
+                            }
+                        }
+                    }
+                    else if (rightToken.getTokenType() == INT) {
+                        rightType = "integer";
+                    }
+                    else if (rightToken.getTokenType() == FLOAT) {
+                        rightType = "real";
+                    }
+
+                    // Сравниваем типы
+                    if (!leftType.empty() && !rightType.empty() && leftType != rightType) {
+                        std::cout << "Error: Type mismatch in arithmetic operation in area '" << expr.area << "'. Operands have types '" << leftType << "' and '" << rightType << "'\n";
                     }
                 }
             }
@@ -334,28 +422,11 @@ void SemanticAnalyzer::checkTypeCompatibility() {
 void SemanticAnalyzer::checkDivisionByZero() {
     for (const auto& expr : eip) {
         for (size_t i = 0; i < expr.expr.size(); ++i) {
-            const auto& token = expr.expr[i];
-            if (token.getValue() == "/" && i < expr.expr.size() - 1) {
-                const auto& nextToken = expr.expr[i + 1];
-
-                bool isZero = (nextToken.getTokenType() == INT && nextToken.getValue() == "0");
-
-                if (!isZero && nextToken.getTokenType() == IDENTIFIER) {
-                    auto varIt = std::find_if(
-                        allVariables.begin(),
-                        allVariables.end(),
-                        [&nextToken](const varsInProgram& var) {
-                            return var.varName == nextToken.getValue();
-                        }
-                    );
-                    if (varIt != allVariables.end() && varIt->varType == "integer") {
-                        // Здесь нужно будет добавить проверку значения переменной, если оно хранится
-                        isZero = false; // Условно (если будет система отслеживания значений).
-                    }
-                }
-
-                if (isZero) {
-                    std::cout << "Error: Division by zero detected in expression." << std::endl;
+            if (expr.expr[i].getValue() == "/" && expr.expr[i].getTokenType() == OPERATOR) {
+                if (i < expr.expr.size() - 1 && 
+                    (expr.expr[i + 1].getTokenType() == INT && expr.expr[i + 1].getValue() == "0" ||
+                        expr.expr[i + 1].getTokenType() == FLOAT && expr.expr[i + 1].getValue() == "0.0")) {
+                    std::cout << "Error: Division by zero detected in area '" << expr.area << "'\n";
                 }
             }
         }
