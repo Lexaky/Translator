@@ -2,16 +2,20 @@
 #include <iostream>
 #include <string>
 
+#include "TokenTypesEnum.h"
+#include "TokenTypes.h"
+
 class Token {
 private:
-	std::string token;
-	// context is ([backContext], [token], [nextContext]), where back and next contexts is also tokens
-	std::string backContext = "";
-	std::string nextContext = "";
+	std::string value;
+	TokenTypesEnum tokenType;
 
 public:
-	Token(std::string text);
-	
-	void getContext(); // Must return context in backContext and nextContext if it's possible
-	std::string getToken(); // return token
+	Token(std::string value, TokenTypesEnum tokenType);
+	Token():value("0"),tokenType(UNKNOWN) {}
+	std::string getValue() const;
+	TokenTypesEnum getTokenType() const;
+	void setValue(std::string newValue) {
+		value = newValue;
+	}
 };
