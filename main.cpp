@@ -43,27 +43,28 @@ int main() {
 	cout << "----------------" << endl;
 	
 	//Syntax analyzer
-//	SyntaxAnalyzer syntaxAnalyzer(variable);
-//	MainClassNode ast = syntaxAnalyzer.buildAst();
+	SyntaxAnalyzer syntaxAnalyzer(variable);
+	cout << "Syntax Analyzer errors:" << endl;
+	MainClassNode ast = syntaxAnalyzer.buildAst();
 //	cout << "AST tree:" << endl;
 //	cout << "----------------" << endl;
 //	ast.print();
 //	cout << "----------------" << endl;
 	
 	//Semantic analyzer here
-	cout << "Semantic Analyzer prints:" << endl;
 	cout << "----------------" << endl;
+	cout << "Semantic Analyzer errors:" << endl;
 	SemanticAnalyzer sa(variable);
-	cout << "----------------" << endl;
-	sa.printAllVariables();
-	cout << "----------------" << endl;
-	sa.printAllExpressions(); 
-	cout << "----------------" << endl;
-	sa.doSemanticAnalysis();
-	
-//	cout << "Pascal generated:" << endl;
 //	cout << "----------------" << endl;
-//	TokenMapper *tm = new TokenMapper(variable);
-//	tm->printPascalCode();
+	sa.printAllVariables();
+//	cout << "----------------" << endl;
+	sa.printAllExpressions(); 
+//	cout << "----------------" << endl;
+	sa.doSemanticAnalysis();
+	cout << "----------------" << endl;
+
+	cout << "Pascal generated:" << endl;
+	TokenMapper *tm = new TokenMapper(variable);
+	tm->printPascalCode();
 	return 0;
 }

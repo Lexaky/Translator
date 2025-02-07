@@ -390,13 +390,15 @@ SoutNode SyntaxAnalyzer::parseSout()
 	check("(", token);
 	token = getNextToken();
 	vector<Token> soutTokens;
-	while (token.getValue() != ")") {  //make validation more complicated
+	int bracketcounter = 1;
+	while (bracketcounter > 0) {  // [Val] added bracket counter for better check (methods or complicated expr)
 		checkTokenForConditionOrExpression(token);
 		//check identifiers
 		soutTokens.push_back(token);
+		if (token.getValue() == "(" && token.getTokenType() == SPECIAL_SYMBOL) { bracketcounter++; }
+		if (token.getValue() == ")" && token.getTokenType() == SPECIAL_SYMBOL) { bracketcounter--; }
 		token = getNextToken();
 	}
-	token = getNextToken();
 	check(";", token);
 	SoutNode node;
 	node.setParams(soutTokens);
