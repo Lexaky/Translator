@@ -73,6 +73,7 @@ void SemanticAnalyzer::fillAllVariables() {
                             }
                             else {
                                 std::cout << "Error: Variable '" << objVIP.varName << "' is already declared in '" << objVIP.area << "'\n";
+                                isErrorExists = true;
                             }
                         }
                     }
@@ -95,6 +96,7 @@ void SemanticAnalyzer::fillAllVariables() {
                 }
                 else {
                     std::cout << "Error: Variable '" << objVIP.varName << "' is already declared in '" << objVIP.area << "'\n";
+                    isErrorExists = true;
                 }
             }
 
@@ -265,7 +267,17 @@ void SemanticAnalyzer::printAllExpressions() {
 
 void SemanticAnalyzer::doSemanticAnalysis() {
     checkVariableDeclaration();
+    if (isErrorExists) {
+        exit(1);
+    }
     checkDivisionByZero();
+    if (isErrorExists) {
+        exit(1);
+    }
+    checkTypeCompatibilityReturnAndAssignment();
+    if (isErrorExists) {
+        exit(1);
+    }
 }
 
 void SemanticAnalyzer::checkVariableDeclaration() {
@@ -283,15 +295,16 @@ void SemanticAnalyzer::checkVariableDeclaration() {
                 }
                 if (!isDeclared) {
                     std::cout << "Error: Variable '" << token.getValue() << "' is not declared in area '" << expr.area << "'\n";
+                    isErrorExists = true;
                 }
             }
         }
     }
 }
 
-void SemanticAnalyzer::checkTypeCompatibility() {
+void SemanticAnalyzer::checkTypeCompatibilityReturnAndAssignment() {
     for (const auto& expr : eip) {
-        // check return expressions
+        // check if return expression
         if (expr.expr.size() > 0 && expr.expr[0].getValue() == "return") {
             std::string expectedType;
             for (const auto& var : allVariables) {
@@ -301,83 +314,244 @@ void SemanticAnalyzer::checkTypeCompatibility() {
                 }
             }
 
-            if (!expectedType.empty()) {
-                // Простая проверка: предполагаем, что возвращаемое значение - это последний токен в выражении
-                const Token& returnToken = expr.expr.back();
-                if (returnToken.getTokenType() == IDENTIFIER) {
-                    for (const auto& var : allVariables) {
-                        if (var.varName == returnToken.getValue() && var.varType != expectedType) {
-                            std::cout << "Error: Return type mismatch in function '" << expr.area << "'. Expected '" << expectedType << "', but got '" << var.varType << "'\n";
+            if (expectedType.empty()) {
+                std::cout << "Error: Encountered return statement in void method\n";
+                isErrorExists = true;
+                continue;
+            }
+
+            bool CurrentIInMethod = false;
+            int bracketcounter = 0;
+            // Check all tokens except first ("return")
+            for (size_t i = 1; i < expr.expr.size(); i++) {
+                const Token& token = expr.expr[i];
+                TokenTypesEnum tokenType = token.getTokenType();
+                
+                if (CurrentIInMethod) {
+                    if (token.getValue() == "(" && token.getTokenType() == SPECIAL_SYMBOL) {
+                        bracketcounter++;
+                    }
+                    if (token.getValue() == ")" && token.getTokenType() == SPECIAL_SYMBOL) {
+                        bracketcounter--;
+                    }
+                    if (bracketcounter > 0) { continue; }
+                    else { CurrentIInMethod = false; continue; }
+                }
+
+                if (tokenType == IDENTIFIER || tokenType == STRING || tokenType == CHAR ||
+                    tokenType == INT || tokenType == FLOAT || tokenType == BOOLEAN) {
+
+                    if (tokenType == IDENTIFIER) {
+                        // Find identifier in allVariables
+                        bool foundinarea = false;
+                        bool foundinglobal = false;
+                        std::string vartype;
+                        for (const auto& var : allVariables) {
+                            if (var.varName == token.getValue()) { 
+                                if (var.area == expr.area) { foundinarea = true; } //local variable
+                                else if (var.area == token.getValue() || var.area == "GLOBAL") { foundinglobal = true; } //method or global variable
+                                
+                                if (foundinarea) {
+                                    vartype = var.varType;
+                                    if (var.area == token.getValue()) {
+                                        CurrentIInMethod = true;
+                                        bracketcounter = 0;
+                                    }
+                                    break;
+                                }
+                                else if (foundinglobal) {
+                                    vartype = var.varType;
+                                    if (var.area == token.getValue()) {
+                                        CurrentIInMethod = true;
+                                        bracketcounter = 0;
+                                    }
+                                }
+                            }
+                        }
+                        // Check compatibility
+                        if (vartype != expectedType) {
+                            std::cout << "Error: Return type mismatch in area '"
+                                << expr.area << "'. Expected '" << expectedType
+                                << "', but found '" << vartype << "' (identifier = '" << token.getValue() << "')\n";
+                            isErrorExists = true;
+                        }
+                    }
+                    else {
+                        // Check other types
+                        std::string literalType;
+                        if (tokenType == INT) {
+                            literalType = "integer";
+                        }
+                        else if (tokenType == FLOAT) {
+                            literalType = "float";
+                        }
+                        else if (tokenType == STRING) {
+                            literalType = "string";
+                        }
+                        else if (tokenType == CHAR) {
+                            literalType = "char";
+                        }
+                        else if (tokenType == BOOLEAN) {
+                            literalType = "boolean";
+                        }
+
+                        // Check compatibility
+                        if (literalType != expectedType) {
+                            std::cout << "Error: Return type mismatch in area '"
+                                << expr.area << "'. Expected '" << expectedType
+                                << "', but found '" << literalType << "' (value = '" << token.getValue() << "')\n";
+                            isErrorExists = true;
                         }
                     }
                 }
-                else if (returnToken.getTokenType() == INT || returnToken.getTokenType() == FLOAT) {
-                    if ((expectedType != "integer" && returnToken.getTokenType() == INT) ||
-                        (expectedType != "float" && returnToken.getTokenType() == FLOAT)) {
-                        std::cout << "Error: Return type mismatch in function '" << expr.area << "'. Expected '" << expectedType << "', but got '" << (returnToken.getTokenType() == INT ? "integer" : "float") << "'\n";
-                    }
-                }
             }
-            else {
-                std::cout << "Error: Encountered return statement in void method" << "\n";
-            }
+            continue;
         }
-
-        // Проверка присваиваний
+        
+        // Check if assignment
+        Token leftPart; // left part
+        std::vector<Token> rightPart; //right part
+        rightPart.reserve(expr.expr.size());
+        bool rightside = false;
         for (size_t i = 0; i < expr.expr.size(); ++i) {
-            if (expr.expr[i].getValue() == "=") {
-                if (i > 0 && i + 1 < expr.expr.size()) {
-                    const Token& leftToken = expr.expr[i - 1];  // Левая часть присваивания
-                    const Token& rightToken = expr.expr[i + 1]; // Правая часть присваивания
-
-                    std::string leftType, rightType;
-
-                    // Определяем тип левой части
-                    if (leftToken.getTokenType() == IDENTIFIER) {
-                        for (const auto& var : allVariables) {
-                            if (var.varName == leftToken.getValue() && var.area == expr.area) {
-                                leftType = var.varType;
-                                break;
-                            }
-                        }
+            if (rightside) {
+                rightPart.push_back(expr.expr[i]);
+            }
+            if (expr.expr[i].getValue() == "=" && expr.expr[i].getTokenType() == OPERATOR) {
+                if (rightside == false) {
+                    if (i > 0) {
+                        leftPart = expr.expr[i - 1];  // left part
+                        rightside = true;
                     }
-
-                    // Определяем тип правой части
-                    if (rightToken.getTokenType() == IDENTIFIER) {
-                        for (const auto& var : allVariables) {
-                            if (var.varName == rightToken.getValue() && var.area == expr.area) {
-                                rightType = var.varType;
-                                break;
-                            }
-                        }
+                    else {
+                        std::cout << "Error: left side of assignment is missing in area '" << expr.area << "'\n";
+                        isErrorExists = true;
                     }
-                    else if (rightToken.getTokenType() == INT) {
-                        rightType = "integer";
-                    }
-                    else if (rightToken.getTokenType() == FLOAT) {
-                        rightType = "real";
-                    }
-
-                    // Сравниваем типы
-                    if (!leftType.empty() && !rightType.empty() && leftType != rightType) {
-                        std::cout << "Error: Type mismatch in assignment in area '" << expr.area << "'. Expected '" << leftType << "', but got '" << rightType << "'\n";
-                    }
+                }
+                else {
+                    std::cout << "Error: found more than one '=' in assignment in area '" << expr.area << "'\n";
+                    isErrorExists = true;
                 }
             }
         }
 
-        // Проверка арифметических операций
+        //not an assignment expr so skip
+        if (rightPart.empty()) {
+            continue;
+        }
+
+        std::string expectedType;
+        for (const auto& var : allVariables) {
+            if (var.varName == leftPart.getValue() && var.area == expr.area) {
+                expectedType = var.varType;
+                break;
+            }
+            if (var.varName == leftPart.getValue() && var.area == "GLOBAL") {
+                expectedType = var.varType;
+            }
+        }
+
+        bool CurrentIInMethod = false;
+        int bracketcounter = 0;
+        // Check all tokens in rightPart
+        for (size_t i = 0; i < rightPart.size(); i++) {
+            const Token& token = rightPart[i];
+            TokenTypesEnum tokenType = token.getTokenType();
+
+            if (CurrentIInMethod) {
+                if (token.getValue() == "(" && token.getTokenType() == SPECIAL_SYMBOL) {
+                    bracketcounter++;
+                }
+                if (token.getValue() == ")" && token.getTokenType() == SPECIAL_SYMBOL) {
+                    bracketcounter--;
+                }
+                if (bracketcounter > 0) { continue; }
+                else { CurrentIInMethod = false; continue; }
+            }
+
+            if (tokenType == IDENTIFIER || tokenType == STRING || tokenType == CHAR ||
+                tokenType == INT || tokenType == FLOAT || tokenType == BOOLEAN) {
+
+                if (tokenType == IDENTIFIER) {
+                    // Find identifier in allVariables
+                    bool foundinarea = false;
+                    bool foundinglobal = false;
+                    std::string vartype;
+                    for (const auto& var : allVariables) {
+                        if (var.varName == token.getValue()) {
+                            if (var.area == expr.area) { foundinarea = true; } //local variable
+                            else if (var.area == token.getValue() || var.area == "GLOBAL") { foundinglobal = true; } //method or global variable
+
+                            if (foundinarea) {
+                                vartype = var.varType;
+                                if (var.area == token.getValue()) {
+                                    CurrentIInMethod = true;
+                                    bracketcounter = 0;
+                                }
+                                break;
+                            }
+                            else if (foundinglobal) {
+                                vartype = var.varType;
+                                if (var.area == token.getValue()) {
+                                    CurrentIInMethod = true;
+                                    bracketcounter = 0;
+                                }
+                            }
+                        }
+                    }
+                    // Check compatibility
+                    if (vartype != expectedType) {
+                        std::cout << "Error: Return type mismatch in area '"
+                            << expr.area << "'. Expected '" << expectedType
+                            << "', but found '" << vartype << "' (identifier = '" << token.getValue() << "')\n";
+                        isErrorExists = true;
+                    }
+                }
+                else {
+                    // Check other types
+                    std::string literalType;
+                    if (tokenType == INT) {
+                        literalType = "integer";
+                    }
+                    else if (tokenType == FLOAT) {
+                        literalType = "float";
+                    }
+                    else if (tokenType == STRING) {
+                        literalType = "string";
+                    }
+                    else if (tokenType == CHAR) {
+                        literalType = "char";
+                    }
+                    else if (tokenType == BOOLEAN) {
+                        literalType = "boolean";
+                    }
+
+                    // Check compatibility
+                    if (literalType != expectedType) {
+                        std::cout << "Error: Return type mismatch in area '"
+                            << expr.area << "'. Expected '" << expectedType
+                            << "', but found '" << literalType << "' (value = '" << token.getValue() << "')\n";
+                        isErrorExists = true;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void SemanticAnalyzer::checkTypeCompatibilityArithmetic() {
+    /*
         for (size_t i = 0; i < expr.expr.size(); ++i) {
             if (expr.expr[i].getTokenType() == OPERATOR &&
                 (expr.expr[i].getValue() == "+" || expr.expr[i].getValue() == "-" ||
                 expr.expr[i].getValue() == "*" || expr.expr[i].getValue() == "/")) {
                 if (i > 0 && i + 1 < expr.expr.size()) {
-                    const Token& leftToken = expr.expr[i - 1];  // Левый операнд
-                    const Token& rightToken = expr.expr[i + 1]; // Правый операнд
+                    const Token& leftToken = expr.expr[i - 1];  // leftPart
+                    const Token& rightToken = expr.expr[i + 1]; // rightPart
 
                     std::string leftType, rightType;
 
-                    // Определяем тип левого операнда
+                    // Check leftPart type
                     if (leftToken.getTokenType() == IDENTIFIER) {
                         for (const auto& var : allVariables) {
                             if (var.varName == leftToken.getValue() && var.area == expr.area) {
@@ -393,7 +567,7 @@ void SemanticAnalyzer::checkTypeCompatibility() {
                         leftType = "real";
                     }
 
-                    // Определяем тип правого операнда
+                    // Check rightPart type
                     if (rightToken.getTokenType() == IDENTIFIER) {
                         for (const auto& var : allVariables) {
                             if (var.varName == rightToken.getValue() && var.area == expr.area) {
@@ -409,14 +583,13 @@ void SemanticAnalyzer::checkTypeCompatibility() {
                         rightType = "real";
                     }
 
-                    // Сравниваем типы
+                    // Compare types
                     if (!leftType.empty() && !rightType.empty() && leftType != rightType) {
                         std::cout << "Error: Type mismatch in arithmetic operation in area '" << expr.area << "'. Operands have types '" << leftType << "' and '" << rightType << "'\n";
                     }
                 }
             }
-        }
-    }
+        }*/
 }
 
 void SemanticAnalyzer::checkDivisionByZero() {
@@ -427,6 +600,122 @@ void SemanticAnalyzer::checkDivisionByZero() {
                     (expr.expr[i + 1].getTokenType() == INT && expr.expr[i + 1].getValue() == "0" ||
                         expr.expr[i + 1].getTokenType() == FLOAT && expr.expr[i + 1].getValue() == "0.0")) {
                     std::cout << "Error: Division by zero detected in area '" << expr.area << "'\n";
+                    isErrorExists = true;
+                }
+            }
+        }
+    }
+}
+
+void SemanticAnalyzer::checkMethodParameters() {
+    for (const auto& expr : eip) {
+        // Check that area != GLOBAL
+        if (expr.area != "GLOBAL") {
+            for (size_t i = 0; i < expr.expr.size(); ++i) {
+                const Token& token = expr.expr[i];
+
+                // Check if token is a method call
+                if (token.getTokenType() == IDENTIFIER && i + 1 < expr.expr.size() && expr.expr[i + 1].getValue() == "(" && expr.expr[i + 1].getTokenType() == SPECIAL_SYMBOL) {
+                    std::string methodName = token.getValue();
+
+                    // Find parameters allVariables
+                    std::vector<varsInProgram> expectedParameters;
+                    for (const auto& var : allVariables) {
+                        if (var.area == methodName && var.inParameter) {
+                            expectedParameters.push_back(var);
+                        }
+                    }
+
+                    // Parse parameters passed
+                    std::vector<Token> passedParameters;
+                    size_t j = i + 2; // skip "("
+                    int bracketcounter = 1;
+                    int parameterscounter = 0;
+                    while (bracketcounter > 0) {  // [Val] added bracket counter for better check (methods or complicated expr)
+                        //check identifiers
+                        passedParameters.push_back(expr.expr[j]);
+                        if (expr.expr[j].getValue() == "(" && expr.expr[j].getTokenType() == SPECIAL_SYMBOL) { bracketcounter++; }
+                        if (expr.expr[j].getValue() == ")" && expr.expr[j].getTokenType() == SPECIAL_SYMBOL) { bracketcounter--; }
+                        if (expr.expr[j].getValue() == "," && expr.expr[j].getTokenType() == SPECIAL_SYMBOL) { parameterscounter++; }
+                        j++;
+                    }
+                    parameterscounter++; //add last parameter
+                    
+                    // Check parameter amount
+                    if (parameterscounter != expectedParameters.size()) {
+                        std::cout << "Error: Method '" << methodName << "' expects " << expectedParameters.size()
+                            << " parameters, but " << parameterscounter << " were passed in area '" << expr.area << "'\n";
+                        isErrorExists = true;
+                        continue;
+                    }
+
+                    // Проверяем типы параметров
+                    int currentparameter = 0;
+                    std::string expectedType = expectedParameters[currentparameter].varType;
+                    for (size_t k = 0; k < passedParameters.size(); ++k) {
+                        TokenTypesEnum tokenType = passedParameters[k].getTokenType();
+
+                        if (tokenType == IDENTIFIER || tokenType == STRING || tokenType == CHAR ||
+                            tokenType == INT || tokenType == FLOAT || tokenType == BOOLEAN) {
+
+                            if (tokenType == IDENTIFIER) {
+                                // Find identifier in allVariables
+                                bool foundinarea = false;
+                                bool foundinglobal = false;
+                                std::string vartype;
+                                for (const auto& var : allVariables) {
+                                    if (var.varName == token.getValue()) {
+                                        if (var.area == expr.area) { foundinarea = true; } //local variable
+                                        else if (var.area == token.getValue() || var.area == "GLOBAL") { foundinglobal = true; } //method or global variable
+
+                                        if (foundinarea) {
+                                            vartype = var.varType;
+                                            break;
+                                        }
+                                        else if (foundinglobal) {
+                                            vartype = var.varType;
+                                        }
+                                    }
+                                }
+                                // Check compatibility
+                                if (vartype != expectedType) {
+                                    std::cout << "Error: Method '" << methodName << "' type mismatch found in " << currentparameter << " parameter passed in area '" 
+                                        << expr.area << "'. Expected '" << expectedType << "', but found '" << vartype << "' ('" << passedParameters[k].getValue() << "')\n";
+                                    isErrorExists = true;
+                                }
+                            }
+                            else {
+                                // Check other types
+                                std::string literalType;
+                                if (tokenType == INT) {
+                                    literalType = "integer";
+                                }
+                                else if (tokenType == FLOAT) {
+                                    literalType = "float";
+                                }
+                                else if (tokenType == STRING) {
+                                    literalType = "string";
+                                }
+                                else if (tokenType == CHAR) {
+                                    literalType = "char";
+                                }
+                                else if (tokenType == BOOLEAN) {
+                                    literalType = "boolean";
+                                }
+
+                                // Check compatibility
+                                if (literalType != expectedType) {
+                                    std::cout << "Error: Method '" << methodName << "' type mismatch found in " << currentparameter << " parameter passed in area '"
+                                        << expr.area << "'. Expected '" << expectedType << "', but found '" << literalType << "' ('" << passedParameters[k].getValue() << "')\n";
+                                    isErrorExists = true;
+                                }
+                            }
+                        }
+                        if (passedParameters[k].getValue() == "," && passedParameters[k].getTokenType() == SPECIAL_SYMBOL) {
+                            currentparameter++;
+                            expectedType = expectedParameters[currentparameter].varType;
+                        }
+                    }
                 }
             }
         }

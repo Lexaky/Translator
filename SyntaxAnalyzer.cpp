@@ -334,7 +334,14 @@ MethodCall SyntaxAnalyzer::parseMethodCall(const string& methodName, const map<s
 		}
 		params.push_back(token);
 		token = getNextToken();
-		check(",", token);
+		if (token.getValue() != "," && token.getValue() != ")") {
+			string message = "Expected comma or close bracket, but was - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+		if (token.getValue() == ")") {
+			resetReceivedToken();
+		}
 		token = getNextToken();
 	}
 	token = getNextToken();
@@ -383,13 +390,15 @@ SoutNode SyntaxAnalyzer::parseSout()
 	check("(", token);
 	token = getNextToken();
 	vector<Token> soutTokens;
-	while (token.getValue() != ")") {  //make validation more complicated
+	int bracketcounter = 1;
+	while (bracketcounter > 0) {  // [Val] added bracket counter for better check (methods or complicated expr)
 		checkTokenForConditionOrExpression(token);
 		//check identifiers
 		soutTokens.push_back(token);
+		if (token.getValue() == "(" && token.getTokenType() == SPECIAL_SYMBOL) { bracketcounter++; }
+		if (token.getValue() == ")" && token.getTokenType() == SPECIAL_SYMBOL) { bracketcounter--; }
 		token = getNextToken();
 	}
-	token = getNextToken();
 	check(";", token);
 	SoutNode node;
 	node.setParams(soutTokens);
@@ -467,7 +476,9 @@ void SyntaxAnalyzer::parseDeclarationAssignment(ConstDeclarationNode& node)
 	//Expression
 	else {
 		vector<Token> initializer;
+		checkTokenForConditionOrExpression(token);
 		checkTokenForConditionOrExpression(secondToken);
+		initializer.push_back(token);
 		initializer.push_back(secondToken);
 		token = getNextToken();
 		while (token.getValue() != ";") {

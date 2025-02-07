@@ -13,10 +13,6 @@ public class Main {
 
 	public static void main (String[] args) {
 		int res = test(5);
-		while (a > 0) {
-			a = a - 1;
-		}
-		return a;
-		System.out.println("Hello world!");
+		System.out.println(res);
 	}
 }
