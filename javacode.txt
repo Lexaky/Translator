@@ -1,12 +1,18 @@
 public class Main {
-    private static final String a = "Hello, world!";
-    public static void main(String[] args) {
-        int count = 0;
-        
-        while (count < 3) {
-            for (int i = 0; i < 5; i++) {
-                System.out.println("count = " + count + ", i = " + i);
-            }
-        }
-    }
+	public static int a = 5;
+	
+	static final String b = "boo";
+
+	private static int test(int a) {
+		if (a == 5) {
+			return a * 10;
+		} else {
+			return 0;	
+		}
+	}
+
+	public static void main (String[] args) {
+		int res = test(5);
+		System.out.println(res);
+	}
 }

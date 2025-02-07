@@ -57,7 +57,6 @@ private:
         {"void", "procedure"},
         {"volatile", "volatile"},
         {"while", "while"},
-        // ������� � �����������
         {"{", "begin"},
         {"}", "end"},
         {";", ";"},
@@ -95,7 +94,7 @@ private:
     void generateFunction(std::string functionName, std::string functionType, std::vector <std::string> varNames,
         std::vector<std::string> varTypes, std::vector<Token> tokens);
     void generateMethods(std::string methodName, std::vector<std::string> varNames,
-        std::vector<std::string>, std::vector <Token> tokens);
+        std::vector<std::string> varTypes, std::vector <Token> tokens);
     void globalGenerator(std::vector<Token> tokens);
     void ifGenerator(std::vector<Token> tokens);
     void whileGenerator(std::vector<Token> tokens);

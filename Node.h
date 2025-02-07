@@ -59,7 +59,7 @@ public:
 		cout << "Method: {" << endl;
 		cout << "returnType: " << returnType << ",\n";
 		cout << "name: " << name << ",\n";
-		cout << "params: [";
+		cout << "params: [\n";
 		for (auto it = params.begin(); it != params.end(); ++it) {
 			cout << it->first << "-" << it->second << ",\n";
 		}
@@ -109,6 +109,14 @@ public:
 	vector <Token> getTokens() {
 		return params;
 	}
+	void print() const override {
+		cout << "MethodCall: [" << endl;
+		for (size_t i = 0; i < params.size(); ++i) {
+			cout << "'" << params.at(i).getValue() << "', ";
+		}
+		cout << "\n";
+		cout << "]," << endl;
+	}
 private:
 	string methodName;
 	vector<Token> params;
@@ -152,7 +160,7 @@ public:
 		}
 		cout << "}," << endl;
 	}
-private:
+protected:
 	string type;
 	string name;
 	bool isGlobal;
@@ -166,6 +174,26 @@ public:
 	void setInitialization(bool hasInitialization);
 	bool isInit() {
 		return hasInitialization;
+	}
+
+	void print() const override {
+		cout << "Variable Declaration: {" << endl;
+		cout << "type: " << type << ",\n";
+		cout << "name: " << name << ",\n";
+		cout << "isGlobal: " << isGlobal << ",\n";
+		if (hasInitialization) {
+			if (initializer.empty()) {
+				cout << "value: " << value.getValue() << ",\n";
+			}
+			else {
+				cout << "value: [" << endl;
+				for (size_t i = 0; i < initializer.size(); ++i) {
+					cout << initializer[i].getValue() << ", ";
+				}
+				cout << "\n]\n";
+			}
+		}
+		cout << "}," << endl;
 	}
 private:
 	bool hasInitialization;
@@ -181,6 +209,16 @@ public:
 	}
 	vector <Token> getTokens() {
 		return rightSide;
+	}
+	void print() const override {
+		cout << "Assignment: {" << endl;
+		cout << "variable: '" << variableName << "',\n";
+		cout << "rightSide: [\n";
+		for (size_t i = 0; i < rightSide.size(); ++i) {
+			cout << "'" << rightSide.at(i).getValue() << "', ";
+		}
+		cout << "\n]\n";
+		cout << "}," << endl;
 	}
 private:
 	string variableName;
@@ -254,6 +292,27 @@ public:
 	bool isElse() {
 		return hasElseStatement;
 	}
+	void print() const override {
+		cout << "IfElse: {" << endl;
+		cout << "condition: [\n";
+		for (size_t i = 0; i < condition.size(); ++i) {
+			cout << "'" << condition.at(i).getValue() << "', ";
+		}
+		cout << "],\n";
+		cout << "trueBody: [\n";
+		for (size_t i = 0; i < trueBody.size(); ++i) {
+			trueBody[i]->print();
+		}
+		if (hasElseStatement) {
+			cout << "\n],\n";
+			cout << "falseBody: [\n";
+			for (size_t i = 0; i < falseBody.size(); ++i) {
+				falseBody[i]->print();
+			}
+		}
+		cout << "]\n";
+		cout << "}" << endl;
+	}
 private:
 	vector<Token> condition;
 	vector<shared_ptr<Node>> trueBody;
@@ -267,6 +326,14 @@ public:
 	void setResult(vector<Token> result);
 	vector <Token> getTokens() {
 		return result;
+	}
+	void print() const override {
+		cout << "ReturnStatement: [" << endl;
+		for (size_t i = 0; i < result.size(); ++i) {
+			cout << "'" << result.at(i).getValue() << "', ";
+		}
+		cout << "\n";
+		cout << "]," << endl;
 	}
 private:
 	vector<Token> result;
