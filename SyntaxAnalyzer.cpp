@@ -334,7 +334,14 @@ MethodCall SyntaxAnalyzer::parseMethodCall(const string& methodName, const map<s
 		}
 		params.push_back(token);
 		token = getNextToken();
-		check(",", token);
+		if (token.getValue() != "," && token.getValue() != ")") {
+			string message = "Expected comma or close bracket, but was - " + token.getValue();
+			cout << message;
+			exit(1);
+		}
+		if (token.getValue() == ")") {
+			resetReceivedToken();
+		}
 		token = getNextToken();
 	}
 	token = getNextToken();
@@ -467,7 +474,9 @@ void SyntaxAnalyzer::parseDeclarationAssignment(ConstDeclarationNode& node)
 	//Expression
 	else {
 		vector<Token> initializer;
+		checkTokenForConditionOrExpression(token);
 		checkTokenForConditionOrExpression(secondToken);
+		initializer.push_back(token);
 		initializer.push_back(secondToken);
 		token = getNextToken();
 		while (token.getValue() != ";") {
